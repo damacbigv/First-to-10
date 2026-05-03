@@ -619,6 +619,46 @@
   </div>
 
   <script>
+    // --- AUDIO SYSTEM ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSynthSound(freq, type, duration, volume) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      
+      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    const sounds = {
+      tick: () => playSynthSound(800 + Math.random() * 100, 'sine', 0.05, 0.05),
+      place: () => playSynthSound(400, 'triangle', 0.2, 0.1),
+      win: () => {
+        playSynthSound(523.25, 'sine', 0.5, 0.1); // C5
+        setTimeout(() => playSynthSound(659.25, 'sine', 0.5, 0.1), 150); // E5
+        setTimeout(() => playSynthSound(783.99, 'sine', 0.8, 0.1), 300); // G5
+      },
+      btn: () => playSynthSound(600, 'sine', 0.05, 0.05),
+      roll: () => {
+        let count = 0;
+        const interval = setInterval(() => {
+          sounds.tick();
+          count++;
+          if (count > 20) clearInterval(interval);
+        }, 100);
+      }
+    };
+
     // --- GAME STATE ---
     let mode = '2p'; // '1p' or '2p'
     let currentPlayer = 1; // 1 or 2
@@ -645,6 +685,12 @@
     const rulesOverlay = document.getElementById('rules-overlay');
     const btnCloseRules = document.getElementById('btn-close-rules');
     const spacingSlider = document.getElementById('spacing-slider');
+
+    // Add button sounds
+    [btnSettings, btnCloseSettings, btnRules, btnCloseRules, btn1p, btn2p, playAgainBtn].forEach(btn => {
+      if (btn) btn.addEventListener('click', () => sounds.btn());
+    });
+
 
     const diceWheel = document.getElementById('dice-wheel');
 
@@ -771,6 +817,8 @@
       if (isSpinning || currentDiceValue !== null || gameOver) return;
       isSpinning = true;
       diceContainer.classList.remove('clickable');
+      sounds.roll();
+
 
       document.querySelectorAll('.wheel-face').forEach(f => f.classList.remove('highlight'));
 
@@ -829,6 +877,7 @@
     }
 
     function placePiece(idx) {
+      sounds.place();
       board[idx] = { value: currentDiceValue, player: currentPlayer };
       
       const cellEl = document.querySelector(`.cell[data-idx="${idx}"]`);
@@ -872,6 +921,7 @@
       clearValidTargets();
 
       if (winLine) {
+        sounds.win();
         winLine.forEach(idx => {
           document.querySelector(`.cell[data-idx="${idx}"]`).classList.add('win-highlight');
         });
