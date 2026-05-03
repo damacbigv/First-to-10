@@ -117,9 +117,10 @@
 
     .wheel-face {
       position: absolute;
-      width: 120px;
-      height: 38px;
-      top: 41px;
+      width: 48px;
+      height: 120px;
+      top: 0px;
+      left: 36px;
       background: linear-gradient(135deg, #ff1e1e, #aa0000);
       border: 2px solid rgba(255, 255, 255, 0.3);
       border-radius: 6px;
@@ -144,17 +145,17 @@
       border-color: #fff;
     }
 
-    /* 10 faces -> 36 deg. R = (38/2)/tan(18deg) = 19 / 0.3249 = 58.4px. Let's use 58.5px to be safe */
-    .wheel-face:nth-child(1) { transform: rotateX(0deg) translateZ(58.5px); }
-    .wheel-face:nth-child(2) { transform: rotateX(36deg) translateZ(58.5px); }
-    .wheel-face:nth-child(3) { transform: rotateX(72deg) translateZ(58.5px); }
-    .wheel-face:nth-child(4) { transform: rotateX(108deg) translateZ(58.5px); }
-    .wheel-face:nth-child(5) { transform: rotateX(144deg) translateZ(58.5px); }
-    .wheel-face:nth-child(6) { transform: rotateX(180deg) translateZ(58.5px); }
-    .wheel-face:nth-child(7) { transform: rotateX(216deg) translateZ(58.5px); }
-    .wheel-face:nth-child(8) { transform: rotateX(252deg) translateZ(58.5px); }
-    .wheel-face:nth-child(9) { transform: rotateX(288deg) translateZ(58.5px); }
-    .wheel-face:nth-child(10) { transform: rotateX(324deg) translateZ(58.5px); }
+    /* 10 faces -> 36 deg. R = (48/2)/tan(18deg) = 24 / 0.3249 = 73.8px. Let's use 74px */
+    .wheel-face:nth-child(1) { transform: rotateY(0deg) translateZ(74px); }
+    .wheel-face:nth-child(2) { transform: rotateY(36deg) translateZ(74px); }
+    .wheel-face:nth-child(3) { transform: rotateY(72deg) translateZ(74px); }
+    .wheel-face:nth-child(4) { transform: rotateY(108deg) translateZ(74px); }
+    .wheel-face:nth-child(5) { transform: rotateY(144deg) translateZ(74px); }
+    .wheel-face:nth-child(6) { transform: rotateY(180deg) translateZ(74px); }
+    .wheel-face:nth-child(7) { transform: rotateY(216deg) translateZ(74px); }
+    .wheel-face:nth-child(8) { transform: rotateY(252deg) translateZ(74px); }
+    .wheel-face:nth-child(9) { transform: rotateY(288deg) translateZ(74px); }
+    .wheel-face:nth-child(10) { transform: rotateY(324deg) translateZ(74px); }
 
     /* --- GAME BOARD --- */
     .game-area {
@@ -563,7 +564,7 @@
 
     const diceWheel = document.getElementById('dice-wheel');
 
-    let diceRotationX = 0;
+    let diceRotationY = 0;
 
     // --- SETTINGS & UI ---
     btnSettings.addEventListener('click', () => {
@@ -687,12 +688,12 @@
       const nums = [1,2,3,4,5,6,7,8,9,0];
       const faceIndex = nums.indexOf(result);
       
-      const targetAngle = 360 - (faceIndex * 36);
+      const targetAngle = -(faceIndex * 36);
       
-      const currentSpins = Math.floor(diceRotationX / 360);
-      diceRotationX = (currentSpins + 3) * 360 + targetAngle;
+      const currentSpins = Math.floor(diceRotationY / 360);
+      diceRotationY = (currentSpins - 3) * 360 + targetAngle;
       
-      diceWheel.style.transform = `rotateX(${diceRotationX}deg) rotateY(0deg) rotateZ(0deg)`;
+      diceWheel.style.transform = `rotateX(0deg) rotateY(${diceRotationY}deg) rotateZ(0deg)`;
 
       setTimeout(() => {
         isSpinning = false;
