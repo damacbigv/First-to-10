@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sum to 10: 3D Stacked Grid</title>
+  <style>
+    :root {
+      --bg-color: #08080a;
+      --neon-cyan: #00f3ff;
+      --neon-magenta: #ff003c;
+      --neon-yellow: #fffb00;
+      --grid-size: 280px;
+      --cell-size: 80px;
+      --layer-gap: 200px;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: #fff;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    header {
+      text-align: center;
+      padding: 10px 0;
+      flex-shrink: 0;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 10px var(--neon-cyan);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    button {
+      background: transparent;
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      box-shadow: 0 0 5px var(--neon-cyan) inset;
+    }
+
+    button:hover, button.active {
+      background: var(--neon-cyan);
+      color: #000;
+      box-shadow: 0 0 15px var(--neon-cyan);
+    }
+
+    .status-bar {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-top: 10px;
+      height: 30px;
+      text-shadow: 0 0 5px currentColor;
+    }
+
+    .status-p1 { color: var(--neon-cyan); }
+    .status-p2 { color: var(--neon-magenta); }
+
+    /* --- DICE --- */
+    .dice-container {
+      perspective: 800px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 120px;
+      margin: 10px 0;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .dice {
+      position: relative;
+      width: 60px;
+      height: 80px;
+      transform-style: preserve-3d;
+      transition: transform 2s cubic-bezier(0.25, 0.1, 0.25, 1);
+      transform: rotateX(-15deg) rotateY(0deg);
+    }
+
+    .dice-face {
+      position: absolute;
+      width: 60px;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #fff;
+      backface-visibility: hidden;
+      background: linear-gradient(135deg, #f23d32, #c41812);
+    }
+
+    .dice-face:nth-child(even) {
+      background: linear-gradient(135deg, #d9241b, #a3110d);
+    }
+
+    .dice-face.top {
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      align-items: flex-end;
+      padding-bottom: 5px;
+      transform-origin: bottom center;
+      top: -40px;
+    }
+
+    .dice-face.bottom {
+      clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+      align-items: flex-start;
+      padding-top: 5px;
+      transform-origin: top center;
+      top: 40px;
+    }
+
+    .dice-face.top:nth-child(1) { transform: rotateY(0deg) translateZ(41.3px) rotateX(31deg); }
+    .dice-face.top:nth-child(2) { transform: rotateY(72deg) translateZ(41.3px) rotateX(31deg); }
+    .dice-face.top:nth-child(3) { transform: rotateY(144deg) translateZ(41.3px) rotateX(31deg); }
+    .dice-face.top:nth-child(4) { transform: rotateY(216deg) translateZ(41.3px) rotateX(31deg); }
+    .dice-face.top:nth-child(5) { transform: rotateY(288deg) translateZ(41.3px) rotateX(31deg); }
+
+    .dice-face.bottom:nth-child(6) { transform: rotateY(36deg) translateZ(41.3px) rotateX(-31deg); }
+    .dice-face.bottom:nth-child(7) { transform: rotateY(108deg) translateZ(41.3px) rotateX(-31deg); }
+    .dice-face.bottom:nth-child(8) { transform: rotateY(180deg) translateZ(41.3px) rotateX(-31deg); }
+    .dice-face.bottom:nth-child(9) { transform: rotateY(252deg) translateZ(41.3px) rotateX(-31deg); }
+    .dice-face.bottom:nth-child(10) { transform: rotateY(324deg) translateZ(41.3px) rotateX(-31deg); }
+
+    .spin-btn-container {
+      text-align: center;
+      margin-top: -10px;
+      z-index: 10;
+      position: relative;
+    }
+
+    .spin-btn {
+      border-color: var(--neon-magenta);
+      color: var(--neon-magenta);
+      box-shadow: 0 0 5px var(--neon-magenta) inset;
+    }
+    .spin-btn:hover:not(:disabled) {
+      background: var(--neon-magenta);
+      color: #fff;
+      box-shadow: 0 0 15px var(--neon-magenta);
+    }
+    .spin-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* --- GAME BOARD --- */
+    .game-area {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .board-rotation-wrapper {
+      position: relative;
+      width: var(--grid-size);
+      height: var(--grid-size);
+      transform-style: preserve-3d;
+      transform: rotateX(55deg) rotateZ(-25deg);
+      transition: transform 0.1s ease-out;
+      cursor: grab;
+    }
+
+    .board-rotation-wrapper:active {
+      cursor: grabbing;
+    }
+
+    .layer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 8px;
+      padding: 10px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+      transform-style: preserve-3d;
+      transition: all 0.3s ease;
+    }
+
+    /* 3 stacked layers */
+    .layer-top { transform: translateZ(var(--layer-gap)); }
+    .layer-mid { transform: translateZ(0); }
+    .layer-bot { transform: translateZ(calc(var(--layer-gap) * -1)); }
+
+    /* Labeling layers */
+    .layer-label {
+      position: absolute;
+      left: -60px;
+      top: 50%;
+      transform: translateY(-50%) rotateZ(25deg) rotateX(-55deg);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #888;
+      letter-spacing: 0.1rem;
+    }
+
+    .cell {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: #fff;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      transform-style: preserve-3d;
+    }
+
+    .cell:hover {
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.05);
+    }
+
+    .cell.valid-target {
+      background: rgba(255, 251, 0, 0.1);
+      border-color: var(--neon-yellow);
+      box-shadow: 0 0 10px rgba(255, 251, 0, 0.5) inset;
+      animation: pulseTarget 1.5s infinite;
+    }
+
+    @keyframes pulseTarget {
+      0% { box-shadow: 0 0 5px rgba(255, 251, 0, 0.3) inset; }
+      50% { box-shadow: 0 0 15px rgba(255, 251, 0, 0.8) inset; }
+      100% { box-shadow: 0 0 5px rgba(255, 251, 0, 0.3) inset; }
+    }
+
+    .cell .content {
+      transform: translateZ(10px);
+      text-shadow: 0 0 10px currentColor;
+    }
+
+    .cell.p1 { color: var(--neon-cyan); }
+    .cell.p2 { color: var(--neon-magenta); }
+
+    .cell.win-highlight {
+      background: rgba(255, 255, 255, 0.9);
+      color: #000;
+      text-shadow: none;
+      box-shadow: 0 0 20px #fff;
+      border-color: #fff;
+      transform: translateZ(10px);
+    }
+
+    /* --- WIN ANIMATION --- */
+    .win-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s;
+    }
+
+    .win-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .countdown-10 {
+      font-size: 15rem;
+      font-weight: 900;
+      color: transparent;
+      -webkit-text-stroke: 4px var(--neon-cyan);
+      text-transform: uppercase;
+      opacity: 0;
+      transform: scale(0.5);
+    }
+
+    .win-overlay.active .countdown-10 {
+      animation: ioCountdown 3s forwards;
+    }
+
+    @keyframes ioCountdown {
+      0% {
+        opacity: 0;
+        transform: scale(0.5) rotateX(90deg);
+        color: transparent;
+        text-shadow: none;
+      }
+      20% {
+        opacity: 1;
+        transform: scale(1.2) rotateX(0deg);
+        -webkit-text-stroke: 4px var(--neon-cyan);
+      }
+      40% {
+        transform: scale(0.9);
+        -webkit-text-stroke: 4px var(--neon-magenta);
+      }
+      60% {
+        transform: scale(1.1);
+        -webkit-text-stroke: 4px var(--neon-yellow);
+        color: rgba(255, 251, 0, 0.2);
+      }
+      80% {
+        transform: scale(1);
+        color: #fff;
+        -webkit-text-stroke: 0px;
+        text-shadow: 0 0 50px #fff, 0 0 100px var(--neon-cyan), 0 0 150px var(--neon-magenta);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+        color: #fff;
+        -webkit-text-stroke: 0px;
+        text-shadow: 0 0 50px #fff, 0 0 100px var(--neon-cyan), 0 0 150px var(--neon-magenta);
+      }
+    }
+
+    .win-text {
+      position: absolute;
+      bottom: 20%;
+      font-size: 2rem;
+      color: #fff;
+      text-shadow: 0 0 10px currentColor;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      opacity: 0;
+    }
+
+    .win-overlay.active .win-text {
+      animation: fadeIn 1s 2s forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    .play-again-btn {
+      position: absolute;
+      bottom: 10%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .win-overlay.active .play-again-btn {
+      animation: fadeIn 1s 2.5s forwards;
+      pointer-events: all;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Sum to 10</h1>
+    <div class="controls">
+      <button id="btn-1p">vs CPU</button>
+      <button id="btn-2p" class="active">2 Player</button>
+    </div>
+    <div class="status-bar" id="status">P1's Turn: Spin the Dice!</div>
+  </header>
+
+  <div class="dice-container">
+    <div class="dice" id="dice">
+      <div class="dice-face top">1</div>
+      <div class="dice-face top">2</div>
+      <div class="dice-face top">3</div>
+      <div class="dice-face top">4</div>
+      <div class="dice-face top">5</div>
+      <div class="dice-face bottom">6</div>
+      <div class="dice-face bottom">7</div>
+      <div class="dice-face bottom">8</div>
+      <div class="dice-face bottom"><span style="text-decoration: underline">9</span></div>
+      <div class="dice-face bottom">0</div>
+    </div>
+  </div>
+
+  <div class="spin-btn-container">
+    <button id="spin-btn" class="spin-btn">SPIN DICE</button>
+  </div>
+
+  <div class="game-area" id="game-area">
+    <div class="board-rotation-wrapper" id="board">
+      
+      <!-- Top Layer (Z=2) -->
+      <div class="layer layer-top" data-z="2">
+        <div class="layer-label">TOP</div>
+        <!-- Cells generated by JS -->
+      </div>
+
+      <!-- Middle Layer (Z=1) -->
+      <div class="layer layer-mid" data-z="1">
+        <div class="layer-label">MID</div>
+        <!-- Cells generated by JS -->
+      </div>
+
+      <!-- Bottom Layer (Z=0) -->
+      <div class="layer layer-bot" data-z="0">
+        <div class="layer-label">BOT</div>
+        <!-- Cells generated by JS -->
+      </div>
+
+    </div>
+  </div>
+
+  <div class="win-overlay" id="win-overlay">
+    <div class="countdown-10">10</div>
+    <div class="win-text" id="win-text">Player 1 Wins!</div>
+    <button class="play-again-btn" id="play-again-btn">Play Again</button>
+  </div>
+
+  <script>
+    // --- GAME STATE ---
+    let mode = '2p'; // '1p' or '2p'
+    let currentPlayer = 1; // 1 or 2
+    let board = new Array(27).fill(null);
+    let currentDiceValue = null;
+    let isSpinning = false;
+    let gameOver = false;
+
+    // --- DOM ELEMENTS ---
+    const btn1p = document.getElementById('btn-1p');
+    const btn2p = document.getElementById('btn-2p');
+    const statusEl = document.getElementById('status');
+    const diceEl = document.getElementById('dice');
+    const spinBtn = document.getElementById('spin-btn');
+    const boardEl = document.getElementById('board');
+    const gameArea = document.getElementById('game-area');
+    const winOverlay = document.getElementById('win-overlay');
+    const winText = document.getElementById('win-text');
+    const playAgainBtn = document.getElementById('play-again-btn');
+
+    // --- INITIALIZE BOARD ---
+    const layers = [
+      document.querySelector('.layer-bot'), // z=0
+      document.querySelector('.layer-mid'), // z=1
+      document.querySelector('.layer-top')  // z=2
+    ];
+
+    layers.forEach((layerEl, z) => {
+      for(let y=0; y<3; y++) {
+        for(let x=0; x<3; x++) {
+          const idx = z * 9 + y * 3 + x;
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.idx = idx;
+          
+          const content = document.createElement('div');
+          content.className = 'content';
+          cell.appendChild(content);
+
+          cell.addEventListener('click', () => handleCellClick(idx));
+          layerEl.appendChild(cell);
+        }
+      }
+    });
+
+    // --- WINNING LINES GENERATION ---
+    const winningLines = [];
+    // 1. Lines along X (varying X)
+    for(let z=0; z<3; z++) {
+      for(let y=0; y<3; y++) {
+        winningLines.push([z*9 + y*3 + 0, z*9 + y*3 + 1, z*9 + y*3 + 2]);
+      }
+    }
+    // 2. Lines along Y (varying Y)
+    for(let z=0; z<3; z++) {
+      for(let x=0; x<3; x++) {
+        winningLines.push([z*9 + 0*3 + x, z*9 + 1*3 + x, z*9 + 2*3 + x]);
+      }
+    }
+    // 3. Lines along Z (varying Z)
+    for(let y=0; y<3; y++) {
+      for(let x=0; x<3; x++) {
+        winningLines.push([0*9 + y*3 + x, 1*9 + y*3 + x, 2*9 + y*3 + x]);
+      }
+    }
+    // 4. 2D diagonals in Z planes
+    for(let z=0; z<3; z++) {
+      winningLines.push([z*9 + 0*3 + 0, z*9 + 1*3 + 1, z*9 + 2*3 + 2]);
+      winningLines.push([z*9 + 0*3 + 2, z*9 + 1*3 + 1, z*9 + 2*3 + 0]);
+    }
+    // 5. 2D diagonals in X planes
+    for(let x=0; x<3; x++) {
+      winningLines.push([0*9 + 0*3 + x, 1*9 + 1*3 + x, 2*9 + 2*3 + x]);
+      winningLines.push([2*9 + 0*3 + x, 1*9 + 1*3 + x, 0*9 + 2*3 + x]);
+    }
+    // 6. 2D diagonals in Y planes
+    for(let y=0; y<3; y++) {
+      winningLines.push([0*9 + y*3 + 0, 1*9 + y*3 + 1, 2*9 + y*3 + 2]);
+      winningLines.push([2*9 + y*3 + 0, 1*9 + y*3 + 1, 0*9 + y*3 + 2]);
+    }
+    // 7. 3D main diagonals
+    winningLines.push([0*9 + 0*3 + 0, 1*9 + 1*3 + 1, 2*9 + 2*3 + 2]);
+    winningLines.push([2*9 + 0*3 + 0, 1*9 + 1*3 + 1, 0*9 + 2*3 + 2]);
+    winningLines.push([0*9 + 2*3 + 0, 1*9 + 1*3 + 1, 2*9 + 0*3 + 2]);
+    winningLines.push([0*9 + 0*3 + 2, 1*9 + 1*3 + 1, 2*9 + 2*3 + 0]);
+
+
+    // --- GAME LOGIC ---
+
+    function setMode(newMode) {
+      if(newMode === '1p') {
+        btn1p.classList.add('active');
+        btn2p.classList.remove('active');
+      } else {
+        btn2p.classList.add('active');
+        btn1p.classList.remove('active');
+      }
+      mode = newMode;
+      resetGame();
+    }
+
+    btn1p.addEventListener('click', () => setMode('1p'));
+    btn2p.addEventListener('click', () => setMode('2p'));
+
+    function updateStatus() {
+      if (gameOver) return;
+
+      if (currentDiceValue === null) {
+        statusEl.textContent = `P${currentPlayer}'s Turn: Spin the Dice!`;
+        statusEl.className = `status-bar status-p${currentPlayer}`;
+        spinBtn.disabled = false;
+        clearValidTargets();
+      } else {
+        statusEl.textContent = `P${currentPlayer} placing: ${currentDiceValue}`;
+        statusEl.className = `status-bar status-p${currentPlayer}`;
+        spinBtn.disabled = true;
+        highlightValidTargets();
+      }
+    }
+
+    let diceRotationX = -15;
+    let diceRotationY = 0;
+    
+    const faceTransforms = {
+      1: { x: -31, y: 0 },
+      2: { x: -31, y: -72 },
+      3: { x: -31, y: -144 },
+      4: { x: -31, y: -216 },
+      5: { x: -31, y: -288 },
+      6: { x: 31, y: -36 },
+      7: { x: 31, y: -108 },
+      8: { x: 31, y: -180 },
+      9: { x: 31, y: -252 },
+      0: { x: 31, y: -324 }
+    };
+
+    function spinDice() {
+      if (isSpinning || currentDiceValue !== null || gameOver) return;
+      isSpinning = true;
+      spinBtn.disabled = true;
+
+      const result = Math.floor(Math.random() * 9) + 1; // 1 to 9
+      
+      const target = faceTransforms[result];
+      
+      // Tumble multiple times
+      diceRotationY -= 3600; 
+      diceRotationX -= 3600;
+      
+      // align to exact face
+      const currentY = Math.floor(diceRotationY / 360) * 360;
+      diceRotationY = currentY + target.y;
+
+      const currentX = Math.floor(diceRotationX / 360) * 360;
+      diceRotationX = currentX + target.x;
+
+      diceEl.style.transform = `rotateX(${diceRotationX}deg) rotateY(${diceRotationY}deg)`;
+
+      setTimeout(() => {
+        isSpinning = false;
+        currentDiceValue = result;
+        updateStatus();
+
+        if (mode === '1p' && currentPlayer === 2) {
+          setTimeout(cpuMove, 500);
+        }
+
+      }, 2000); // matches CSS transition
+    }
+
+    spinBtn.addEventListener('click', spinDice);
+
+    function handleCellClick(idx) {
+      if (gameOver || isSpinning || currentDiceValue === null) return;
+      if (mode === '1p' && currentPlayer === 2) return; // CPU turn
+      if (board[idx] !== null) return; // occupied
+
+      placePiece(idx);
+    }
+
+    function highlightValidTargets() {
+      document.querySelectorAll('.cell').forEach(cell => {
+        const idx = parseInt(cell.dataset.idx);
+        if (board[idx] === null) {
+          cell.classList.add('valid-target');
+        } else {
+          cell.classList.remove('valid-target');
+        }
+      });
+    }
+
+    function clearValidTargets() {
+      document.querySelectorAll('.cell').forEach(cell => {
+        cell.classList.remove('valid-target');
+      });
+    }
+
+    function placePiece(idx) {
+      board[idx] = { value: currentDiceValue, player: currentPlayer };
+      
+      const cellEl = document.querySelector(`.cell[data-idx="${idx}"]`);
+      cellEl.querySelector('.content').textContent = currentDiceValue;
+      cellEl.classList.add(`p${currentPlayer}`);
+      
+      const winLine = checkWin();
+      
+      if (winLine) {
+        endGame(currentPlayer, winLine);
+      } else if (board.every(cell => cell !== null)) {
+        endGame(0, null); // draw
+      } else {
+        // Next turn
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+        currentDiceValue = null;
+        updateStatus();
+
+        if (mode === '1p' && currentPlayer === 2 && !gameOver) {
+          setTimeout(spinDice, 500);
+        }
+      }
+    }
+
+    function checkWin() {
+      // Check if any line has 3 pieces that sum to 10
+      for (const line of winningLines) {
+        const [a, b, c] = line;
+        if (board[a] && board[b] && board[c]) {
+          const sum = board[a].value + board[b].value + board[c].value;
+          if (sum === 10) {
+            return line;
+          }
+        }
+      }
+      return null;
+    }
+
+    function endGame(winnerPlayer, winLine) {
+      gameOver = true;
+      clearValidTargets();
+      spinBtn.disabled = true;
+
+      if (winLine) {
+        winLine.forEach(idx => {
+          document.querySelector(`.cell[data-idx="${idx}"]`).classList.add('win-highlight');
+        });
+
+        setTimeout(() => {
+          winText.textContent = `Player ${winnerPlayer} Wins!`;
+          if(mode === '1p' && winnerPlayer === 2) winText.textContent = `CPU Wins!`;
+          winText.className = `win-text status-p${winnerPlayer}`;
+          winOverlay.classList.add('active');
+        }, 800);
+      } else {
+        // Draw
+        statusEl.textContent = "It's a Draw!";
+        statusEl.style.color = "#fff";
+        setTimeout(() => {
+          winText.textContent = `Draw!`;
+          winText.className = `win-text`;
+          winOverlay.classList.add('active');
+        }, 800);
+      }
+    }
+
+    function resetGame() {
+      board.fill(null);
+      currentPlayer = 1;
+      currentDiceValue = null;
+      isSpinning = false;
+      gameOver = false;
+      winOverlay.classList.remove('active');
+
+      document.querySelectorAll('.cell').forEach(cell => {
+        cell.className = 'cell'; // remove p1, p2, valid-target, win-highlight
+        cell.querySelector('.content').textContent = '';
+      });
+
+      updateStatus();
+    }
+
+    playAgainBtn.addEventListener('click', resetGame);
+
+    // --- CPU LOGIC ---
+    function cpuMove() {
+      if (gameOver || currentDiceValue === null) return;
+      
+      // Find empty spots
+      const emptySpots = board.map((cell, idx) => cell === null ? idx : null).filter(val => val !== null);
+      if (emptySpots.length === 0) return;
+
+      // 1. Can CPU win right now with currentDiceValue?
+      let bestMove = null;
+      for (const idx of emptySpots) {
+        board[idx] = { value: currentDiceValue, player: 2 };
+        if (checkWin()) bestMove = idx;
+        board[idx] = null;
+        if (bestMove !== null) break;
+      }
+
+      // 2. Can Player win on next turn? (Hard to predict since dice is random, just pick a random or strategic spot)
+      if (bestMove === null) {
+        // Just pick a random empty spot
+        bestMove = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+      }
+
+      setTimeout(() => {
+        placePiece(bestMove);
+      }, 600);
+    }
+
+
+    // --- 3D BOARD ROTATION (Touch / Mouse) ---
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let currentRotateX = 55;
+    let currentRotateZ = -25;
+
+    function startDrag(e) {
+      if (e.target.closest('.cell') && !isDragging) {
+        // Let cell click handle it if not actually dragging
+      }
+      isDragging = true;
+      startX = e.touches ? e.touches[0].clientX : e.clientX;
+      startY = e.touches ? e.touches[0].clientY : e.clientY;
+    }
+
+    function onDrag(e) {
+      if (!isDragging) return;
+      e.preventDefault(); // prevent scrolling
+      
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      const deltaX = clientX - startX;
+      const deltaY = clientY - startY;
+
+      currentRotateZ += deltaX * 0.5;
+      currentRotateX -= deltaY * 0.5;
+
+      // Limit X rotation so we don't flip upside down completely
+      currentRotateX = Math.max(0, Math.min(90, currentRotateX));
+
+      boardEl.style.transform = `rotateX(${currentRotateX}deg) rotateZ(${currentRotateZ}deg)`;
+
+      startX = clientX;
+      startY = clientY;
+    }
+
+    function endDrag() {
+      isDragging = false;
+    }
+
+    gameArea.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', onDrag);
+    window.addEventListener('mouseup', endDrag);
+
+    gameArea.addEventListener('touchstart', startDrag, { passive: false });
+    window.addEventListener('touchmove', onDrag, { passive: false });
+    window.addEventListener('touchend', endDrag);
+
+    // Initialize
+    updateStatus();
+
+  </script>
+</body>
+</html>
