@@ -497,6 +497,49 @@
       margin: 20px 0 30px 0;
     }
 
+    /* --- BACKGROUND STARS --- */
+    .stars-container {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      color: rgba(0, 243, 255, 0.2);
+      font-family: 'Times New Roman', serif;
+      font-weight: bold;
+      animation: twinkle var(--duration) infinite ease-in-out;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.1; transform: scale(0.8); }
+      50% { opacity: 0.6; transform: scale(1.1); }
+    }
+
+    /* --- SPIN HINT --- */
+    .spin-hint {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      animation: hintBounce 2s infinite;
+      pointer-events: none;
+      text-shadow: 0 0 5px var(--neon-cyan);
+      opacity: 0.8;
+      transition: opacity 0.5s;
+    }
+    .spin-hint.hidden { opacity: 0; }
+    @keyframes hintBounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-5px); }
+    }
+
     /* --- RULES --- */
     .rules-overlay {
       position: fixed;
@@ -562,12 +605,15 @@
 </head>
 <body>
 
+  <div class="stars-container" id="stars-container"></div>
+
   <header>
 
     <div class="status-bar" id="status">P1's Turn: Spin the Dice!</div>
   </header>
 
   <div class="dice-container" id="dice-container">
+    <div class="spin-hint" id="spin-hint">Press Here to Spin</div>
     <div class="dice-wheel" id="dice-wheel">
       <div class="wheel-face">1</div>
       <div class="wheel-face">2</div>
@@ -614,7 +660,7 @@
     <button id="btn-rules" class="icon-btn" title="Rules">❓</button>
   </div>
 
-  <div class="settings-overlay active" id="settings-overlay">
+  <div class="settings-overlay" id="settings-overlay">
     <div class="settings-content">
       <h1>First to 10</h1>
       <h2>Game Mode</h2>
@@ -626,7 +672,7 @@
     </div>
   </div>
 
-  <div class="rules-overlay" id="rules-overlay">
+  <div class="rules-overlay active" id="rules-overlay">
     <div class="rules-content">
       <h2>How to Play</h2>
       <ul class="rules-list">
@@ -693,6 +739,8 @@
     let currentDiceValue = null;
     let isSpinning = false;
     let gameOver = false;
+    let gameStarted = false;
+    let bgmStarted = false;
 
     // --- DOM ELEMENTS ---
     const btn1p = document.getElementById('btn-1p');
@@ -712,6 +760,7 @@
     const rulesOverlay = document.getElementById('rules-overlay');
     const btnCloseRules = document.getElementById('btn-close-rules');
     const spacingSlider = document.getElementById('spacing-slider');
+    const spinHint = document.getElementById('spin-hint');
 
     // Add button sounds
     [btnSettings, btnCloseSettings, btnRules, btnCloseRules, btn1p, btn2p, playAgainBtn].forEach(btn => {
@@ -736,7 +785,24 @@
     });
     btnCloseRules.addEventListener('click', () => {
       rulesOverlay.classList.remove('active');
+      if (!gameStarted) {
+        overlaySettings.classList.add('active');
+        if (!bgmStarted) startBGM();
+      }
     });
+
+    function startBGM() {
+      if (bgmStarted) return;
+      bgmStarted = true;
+      const notes = [110, 123.47, 130.81, 146.83]; // A2, B2, C3, D3
+      let step = 0;
+      setInterval(() => {
+        if (!gameOver) {
+          playSynthSound(notes[step % notes.length], 'sine', 1.5, 0.005); // Very low volume
+          step++;
+        }
+      }, 3000);
+    }
 
     spacingSlider.addEventListener('input', (e) => {
       document.documentElement.style.setProperty('--layer-gap', e.target.value + 'px');
@@ -843,6 +909,8 @@
     function spinDice() {
       if (isSpinning || currentDiceValue !== null || gameOver) return;
       isSpinning = true;
+      gameStarted = true;
+      spinHint.classList.add('hidden');
       diceContainer.classList.remove('clickable');
       sounds.roll();
 
@@ -1068,7 +1136,24 @@
     window.addEventListener('touchmove', onDrag, { passive: false });
     window.addEventListener('touchend', endDrag);
 
+    // Background Stars
+    function initStars() {
+      const container = document.getElementById('stars-container');
+      const symbols = ['X', 'XX'];
+      for(let i=0; i<35; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.setProperty('--duration', (3 + Math.random() * 4) + 's');
+        star.style.fontSize = (8 + Math.random() * 10) + 'px';
+        container.appendChild(star);
+      }
+    }
+
     // Initialize
+    initStars();
     updateStatus();
 
   </script>
