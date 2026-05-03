@@ -497,6 +497,32 @@
       margin: 20px 0 30px 0;
     }
 
+    /* --- AUDIO & UI --- */
+    .mute-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 1000;
+      font-size: 1.4rem;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 10px var(--neon-cyan);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0.8;
+    }
+    .mute-btn:hover {
+      transform: scale(1.15) rotate(5deg);
+      opacity: 1;
+      text-shadow: 0 0 20px var(--neon-cyan);
+    }
+    .mute-btn.muted {
+      color: #555;
+      text-shadow: none;
+    }
+
     /* --- BACKGROUND STARS --- */
     .stars-container {
       position: fixed;
@@ -607,8 +633,11 @@
 
   <div class="stars-container" id="stars-container"></div>
 
-  <header>
+  <!-- Ambient Background Music -->
+  <audio id="bg-music" loop src="https://www.chosic.com/wp-content/uploads/2021/04/And-So-It-Begins-Inspired-By-Lo-Fi.mp3"></audio>
 
+  <header>
+    <button id="btn-mute" class="mute-btn" title="Toggle Sound">🔊</button>
     <div class="status-bar" id="status">P1's Turn: Spin the Dice!</div>
   </header>
 
@@ -660,6 +689,26 @@
     <button id="btn-rules" class="icon-btn" title="Rules">❓</button>
   </div>
 
+  <div class="rules-overlay active" id="rules-overlay">
+    <div class="rules-content">
+      <h1 style="color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan); margin: 0 0 10px 0; font-size: 2.2rem; letter-spacing: 4px;">SUM TO 10</h1>
+      <h2 style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 25px;">Tutorial & Onboarding</h2>
+      
+      <div style="text-align: left; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border-left: 3px solid var(--neon-cyan); margin-bottom: 30px;">
+        <p style="margin: 0 0 15px 0; color: #fff; line-height: 1.4;">Players must complete a <strong>3-in-a-row</strong> line that sums up to exactly <strong>10</strong>.</p>
+        <p style="margin: 0; color: #ccc; font-size: 0.9rem; line-height: 1.4;">Lines can be horizontal, vertical, or diagonal across a single board—or cutting through all <strong>three vertical layers</strong>!</p>
+      </div>
+
+      <ul class="rules-list" style="font-size: 0.85rem; opacity: 0.9;">
+        <li>Spin the dice reel to get a number (1-9).</li>
+        <li>Tap any empty cell on the 3D grid to place it.</li>
+        <li>Form a line of 3 numbers adding to 10 to win.</li>
+      </ul>
+
+      <button id="btn-close-rules" style="width: 100%; padding: 18px; font-weight: bold; letter-spacing: 3px; border-radius: 8px; margin-top: 10px;">START GAME</button>
+    </div>
+  </div>
+
   <div class="settings-overlay" id="settings-overlay">
     <div class="settings-content">
       <h1>First to 10</h1>
@@ -668,20 +717,7 @@
         <button id="btn-1p">1 Player (vs CPU)</button>
         <button id="btn-2p" class="active">2 Player (Local)</button>
       </div>
-      <button id="btn-close-settings">Start Game</button>
-    </div>
-  </div>
-
-  <div class="rules-overlay active" id="rules-overlay">
-    <div class="rules-content">
-      <h2>How to Play</h2>
-      <ul class="rules-list">
-        <li>Click the dice reel to spin and get a number (1-9).</li>
-        <li>Place your number in any empty cell on the 3D grid.</li>
-        <li><strong>Win Condition:</strong> Be the first to complete a straight line (horizontal, vertical, or diagonal) of 3 numbers that sum up to exactly <strong>10</strong>.</li>
-        <li>Lines can span across the three vertical layers!</li>
-      </ul>
-      <button id="btn-close-rules">Got it!</button>
+      <button id="btn-close-settings">Confirm Mode</button>
     </div>
   </div>
 
@@ -740,7 +776,6 @@
     let isSpinning = false;
     let gameOver = false;
     let gameStarted = false;
-    let bgmStarted = false;
 
     // --- DOM ELEMENTS ---
     const btn1p = document.getElementById('btn-1p');
@@ -761,6 +796,9 @@
     const btnCloseRules = document.getElementById('btn-close-rules');
     const spacingSlider = document.getElementById('spacing-slider');
     const spinHint = document.getElementById('spin-hint');
+    const bgMusic = document.getElementById('bg-music');
+    const btnMute = document.getElementById('btn-mute');
+    let isMuted = false;
 
     // Add button sounds
     [btnSettings, btnCloseSettings, btnRules, btnCloseRules, btn1p, btn2p, playAgainBtn].forEach(btn => {
@@ -783,26 +821,31 @@
     btnRules.addEventListener('click', () => {
       rulesOverlay.classList.add('active');
     });
+    
     btnCloseRules.addEventListener('click', () => {
       rulesOverlay.classList.remove('active');
       if (!gameStarted) {
-        overlaySettings.classList.add('active');
-        if (!bgmStarted) startBGM();
+        settingsOverlay.classList.add('active');
+        // Start music on first interaction
+        if (!isMuted && bgMusic.paused) {
+          bgMusic.play().catch(e => console.log("Audio play blocked", e));
+        }
       }
     });
 
-    function startBGM() {
-      if (bgmStarted) return;
-      bgmStarted = true;
-      const notes = [110, 123.47, 130.81, 146.83]; // A2, B2, C3, D3
-      let step = 0;
-      setInterval(() => {
-        if (!gameOver) {
-          playSynthSound(notes[step % notes.length], 'sine', 1.5, 0.005); // Very low volume
-          step++;
-        }
-      }, 3000);
-    }
+    btnMute.addEventListener('click', () => {
+      isMuted = !isMuted;
+      bgMusic.muted = isMuted;
+      btnMute.textContent = isMuted ? '🔇' : '🔊';
+      btnMute.classList.toggle('muted', isMuted);
+    });
+
+    // Fallback play on any first click
+    document.addEventListener('click', () => {
+      if (bgMusic.paused && !isMuted) {
+        bgMusic.play().catch(e => {});
+      }
+    }, { once: true });
 
     spacingSlider.addEventListener('input', (e) => {
       document.documentElement.style.setProperty('--layer-gap', e.target.value + 'px');
