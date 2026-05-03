@@ -10,16 +10,16 @@
       --neon-cyan: #00f3ff;
       --neon-magenta: #ff003c;
       --neon-yellow: #fffb00;
-      --grid-size: 320px;
-      --cell-size: 90px;
-      --layer-gap: 200px;
+      --grid-size: 75vmin;
+      --cell-size: calc(var(--grid-size) / 3.5);
+      --layer-gap: 25vmin;
     }
 
     @media (max-width: 480px) {
       :root {
-        --grid-size: 240px;
-        --cell-size: 70px;
-        --layer-gap: 100px;
+        --grid-size: 65vmin;
+        --cell-size: calc(var(--grid-size) / 3.5);
+        --layer-gap: 15vmin;
       }
       .status-bar { font-size: 1rem; }
       .dice-container { height: 70px; }
@@ -28,10 +28,20 @@
     }
 
 
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+    }
+
     * {
       box-sizing: border-box;
       user-select: none;
       -webkit-user-select: none;
+      touch-action: none; /* Prevent browser handling of touch gestures */
     }
 
     body {
@@ -1035,8 +1045,8 @@
       const deltaX = clientX - startX;
       const deltaY = clientY - startY;
 
-      currentRotateZ += deltaX * 0.5;
-      currentRotateX -= deltaY * 0.5;
+      currentRotateZ -= deltaX * 0.5;
+      currentRotateX += deltaY * 0.5;
 
       // Limit X rotation so we don't flip upside down completely
       currentRotateX = Math.max(0, Math.min(90, currentRotateX));
