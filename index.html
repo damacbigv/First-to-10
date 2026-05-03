@@ -91,7 +91,7 @@
     .dice-container {
       position: relative;
       width: 120px;
-      height: 120px;
+      height: 80px;
       margin: 20px auto;
       perspective: 1000px;
       cursor: pointer;
@@ -118,7 +118,7 @@
     .wheel-face {
       position: absolute;
       width: 48px;
-      height: 120px;
+      height: 80px;
       top: 0px;
       left: 36px;
       background: linear-gradient(135deg, #ff1e1e, #aa0000);
@@ -145,17 +145,16 @@
       border-color: #fff;
     }
 
-    /* 10 faces -> 36 deg. R = (48/2)/tan(18deg) = 24 / 0.3249 = 73.8px. Let's use 74px */
-    .wheel-face:nth-child(1) { transform: rotateY(0deg) translateZ(74px); }
-    .wheel-face:nth-child(2) { transform: rotateY(36deg) translateZ(74px); }
-    .wheel-face:nth-child(3) { transform: rotateY(72deg) translateZ(74px); }
-    .wheel-face:nth-child(4) { transform: rotateY(108deg) translateZ(74px); }
-    .wheel-face:nth-child(5) { transform: rotateY(144deg) translateZ(74px); }
-    .wheel-face:nth-child(6) { transform: rotateY(180deg) translateZ(74px); }
-    .wheel-face:nth-child(7) { transform: rotateY(216deg) translateZ(74px); }
-    .wheel-face:nth-child(8) { transform: rotateY(252deg) translateZ(74px); }
-    .wheel-face:nth-child(9) { transform: rotateY(288deg) translateZ(74px); }
-    .wheel-face:nth-child(10) { transform: rotateY(324deg) translateZ(74px); }
+    /* 9 faces -> 40 deg. R = (48/2)/tan(20deg) = 24 / 0.36397 = 65.9px. Let's use 66px */
+    .wheel-face:nth-child(1) { transform: rotateY(0deg) translateZ(66px); }
+    .wheel-face:nth-child(2) { transform: rotateY(40deg) translateZ(66px); }
+    .wheel-face:nth-child(3) { transform: rotateY(80deg) translateZ(66px); }
+    .wheel-face:nth-child(4) { transform: rotateY(120deg) translateZ(66px); }
+    .wheel-face:nth-child(5) { transform: rotateY(160deg) translateZ(66px); }
+    .wheel-face:nth-child(6) { transform: rotateY(200deg) translateZ(66px); }
+    .wheel-face:nth-child(7) { transform: rotateY(240deg) translateZ(66px); }
+    .wheel-face:nth-child(8) { transform: rotateY(280deg) translateZ(66px); }
+    .wheel-face:nth-child(9) { transform: rotateY(320deg) translateZ(66px); }
 
     /* --- GAME BOARD --- */
     .game-area {
@@ -486,7 +485,6 @@
       <div class="wheel-face">7</div>
       <div class="wheel-face">8</div>
       <div class="wheel-face"><span style="text-decoration: underline">9</span></div>
-      <div class="wheel-face">0</div>
     </div>
   </div>
 
@@ -685,10 +683,10 @@
 
       const result = Math.floor(Math.random() * 9) + 1; // 1 to 9
       
-      const nums = [1,2,3,4,5,6,7,8,9,0];
+      const nums = [1,2,3,4,5,6,7,8,9];
       const faceIndex = nums.indexOf(result);
       
-      const targetAngle = -(faceIndex * 36);
+      const targetAngle = -(faceIndex * 40);
       
       const currentSpins = Math.floor(diceRotationY / 360);
       diceRotationY = (currentSpins - 3) * 360 + targetAngle;
