@@ -112,7 +112,7 @@
       position: relative;
       transform-style: preserve-3d;
       transition: transform 2.5s cubic-bezier(0.1, 0.8, 0.1, 1);
-      transform: rotateX(0deg) rotateY(15deg) rotateZ(0deg);
+      transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
     }
 
     .wheel-face {
@@ -681,7 +681,7 @@
       const currentSpins = Math.floor(diceRotationX / 360);
       diceRotationX = (currentSpins + 3) * 360 + targetAngle;
       
-      diceWheel.style.transform = `rotateX(${diceRotationX}deg) rotateY(15deg) rotateZ(0deg)`;
+      diceWheel.style.transform = `rotateX(${diceRotationX}deg) rotateY(0deg) rotateZ(0deg)`;
 
       setTimeout(() => {
         isSpinning = false;
