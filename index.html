@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sum to 10: 3D Stacked Grid</title>
+  <title>First to 10: 3D Stacked Grid</title>
   <style>
     :root {
       --bg-color: #08080a;
@@ -143,21 +143,22 @@
       top: 40px;
     }
 
-    .dice-face.top:nth-child(1) { transform: rotateY(0deg) translateZ(41.3px) rotateX(31deg); }
-    .dice-face.top:nth-child(2) { transform: rotateY(72deg) translateZ(41.3px) rotateX(31deg); }
-    .dice-face.top:nth-child(3) { transform: rotateY(144deg) translateZ(41.3px) rotateX(31deg); }
-    .dice-face.top:nth-child(4) { transform: rotateY(216deg) translateZ(41.3px) rotateX(31deg); }
-    .dice-face.top:nth-child(5) { transform: rotateY(288deg) translateZ(41.3px) rotateX(31deg); }
+    .dice-face.top:nth-child(1) { transform: rotateY(0deg) translateZ(41px) rotateX(31deg) scale(1.04); }
+    .dice-face.top:nth-child(2) { transform: rotateY(72deg) translateZ(41px) rotateX(31deg) scale(1.04); }
+    .dice-face.top:nth-child(3) { transform: rotateY(144deg) translateZ(41px) rotateX(31deg) scale(1.04); }
+    .dice-face.top:nth-child(4) { transform: rotateY(216deg) translateZ(41px) rotateX(31deg) scale(1.04); }
+    .dice-face.top:nth-child(5) { transform: rotateY(288deg) translateZ(41px) rotateX(31deg) scale(1.04); }
 
-    .dice-face.bottom:nth-child(6) { transform: rotateY(36deg) translateZ(41.3px) rotateX(-31deg); }
-    .dice-face.bottom:nth-child(7) { transform: rotateY(108deg) translateZ(41.3px) rotateX(-31deg); }
-    .dice-face.bottom:nth-child(8) { transform: rotateY(180deg) translateZ(41.3px) rotateX(-31deg); }
-    .dice-face.bottom:nth-child(9) { transform: rotateY(252deg) translateZ(41.3px) rotateX(-31deg); }
-    .dice-face.bottom:nth-child(10) { transform: rotateY(324deg) translateZ(41.3px) rotateX(-31deg); }
+    .dice-face.bottom:nth-child(6) { transform: rotateY(36deg) translateZ(41px) rotateX(-31deg) scale(1.04); }
+    .dice-face.bottom:nth-child(7) { transform: rotateY(108deg) translateZ(41px) rotateX(-31deg) scale(1.04); }
+    .dice-face.bottom:nth-child(8) { transform: rotateY(180deg) translateZ(41px) rotateX(-31deg) scale(1.04); }
+    .dice-face.bottom:nth-child(9) { transform: rotateY(252deg) translateZ(41px) rotateX(-31deg) scale(1.04); }
+    .dice-face.bottom:nth-child(10) { transform: rotateY(324deg) translateZ(41px) rotateX(-31deg) scale(1.04); }
 
     .spin-btn-container {
       text-align: center;
-      margin-top: -10px;
+      margin-top: 30px;
+      margin-bottom: 20px;
       z-index: 10;
       position: relative;
     }
@@ -376,6 +377,91 @@
       to { opacity: 1; }
     }
 
+    /* --- SLIDER & FOOTER --- */
+    .footer-controls {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .control-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2rem;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 200px;
+      background: transparent;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 2px;
+      cursor: pointer;
+      background: #444;
+      border-radius: 1px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: var(--neon-cyan);
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -7px;
+      box-shadow: 0 0 10px var(--neon-cyan);
+    }
+    input[type="range"]:focus {
+      outline: none;
+    }
+
+    /* --- SETTINGS --- */
+    .settings-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .settings-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .settings-content {
+      background: #111;
+      border: 1px solid var(--neon-cyan);
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+    }
+    .settings-content h2 {
+      margin-top: 0;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .settings-options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 20px 0 30px 0;
+    }
+
     .play-again-btn {
       position: absolute;
       bottom: 10%;
@@ -393,10 +479,9 @@
 <body>
 
   <header>
-    <h1>Sum to 10</h1>
+    <h1>First to 10</h1>
     <div class="controls">
-      <button id="btn-1p">vs CPU</button>
-      <button id="btn-2p" class="active">2 Player</button>
+      <button id="btn-settings">Settings</button>
     </div>
     <div class="status-bar" id="status">P1's Turn: Spin the Dice!</div>
   </header>
@@ -444,6 +529,22 @@
     </div>
   </div>
 
+  <div class="footer-controls">
+    <div class="control-label">Vertical Spacing</div>
+    <input type="range" id="spacing-slider" min="50" max="400" value="200">
+  </div>
+
+  <div class="settings-overlay" id="settings-overlay">
+    <div class="settings-content">
+      <h2>Game Mode</h2>
+      <div class="settings-options">
+        <button id="btn-1p">1 Player (vs CPU)</button>
+        <button id="btn-2p" class="active">2 Player (Local)</button>
+      </div>
+      <button id="btn-close-settings">Close Settings</button>
+    </div>
+  </div>
+
   <div class="win-overlay" id="win-overlay">
     <div class="countdown-10">10</div>
     <div class="win-text" id="win-text">Player 1 Wins!</div>
@@ -471,7 +572,22 @@
     const winText = document.getElementById('win-text');
     const playAgainBtn = document.getElementById('play-again-btn');
 
-    // --- INITIALIZE BOARD ---
+    const btnSettings = document.getElementById('btn-settings');
+    const settingsOverlay = document.getElementById('settings-overlay');
+    const btnCloseSettings = document.getElementById('btn-close-settings');
+    const spacingSlider = document.getElementById('spacing-slider');
+
+    // --- SETTINGS & UI ---
+    btnSettings.addEventListener('click', () => {
+      settingsOverlay.classList.add('active');
+    });
+    btnCloseSettings.addEventListener('click', () => {
+      settingsOverlay.classList.remove('active');
+    });
+
+    spacingSlider.addEventListener('input', (e) => {
+      document.documentElement.style.setProperty('--layer-gap', e.target.value + 'px');
+    });
     const layers = [
       document.querySelector('.layer-bot'), // z=0
       document.querySelector('.layer-mid'), // z=1
