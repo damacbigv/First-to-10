@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>First to 10: 3D Stacked Grid</title>
   <style>
     :root {
@@ -9,10 +10,23 @@
       --neon-cyan: #00f3ff;
       --neon-magenta: #ff003c;
       --neon-yellow: #fffb00;
-      --grid-size: 280px;
-      --cell-size: 80px;
+      --grid-size: 320px;
+      --cell-size: 90px;
       --layer-gap: 200px;
     }
+
+    @media (max-width: 480px) {
+      :root {
+        --grid-size: 260px;
+        --cell-size: 75px;
+        --layer-gap: 120px;
+      }
+      .status-bar { font-size: 1rem; }
+      .dice-container { height: 70px; }
+      .wheel-face { height: 100px; width: 40px; font-size: 20px; }
+      .icon-btn { font-size: 1.5rem; }
+    }
+
 
     * {
       box-sizing: border-box;
@@ -493,12 +507,14 @@
     .rules-content {
       background: #111;
       border: 1px solid var(--neon-cyan);
-      padding: 30px;
+      padding: 20px;
       border-radius: 12px;
       text-align: center;
       box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
       max-width: 90%;
       width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .rules-content h2 {
       margin-top: 0;
