@@ -50,12 +50,7 @@
       text-shadow: 0 0 10px var(--neon-cyan);
     }
 
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 10px;
-    }
+
 
     button {
       background: transparent;
@@ -359,11 +354,37 @@
     .footer-controls {
       padding: 15px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 20px;
       flex-shrink: 0;
       z-index: 10;
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: #888;
+      font-size: 1.8rem;
+      cursor: pointer;
+      padding: 5px;
+      transition: all 0.2s;
+      box-shadow: none;
+    }
+
+    .icon-btn:hover {
+      color: var(--neon-cyan);
+      transform: scale(1.1) rotate(90deg);
+      box-shadow: none;
+      background: transparent;
     }
 
     .control-label {
@@ -468,9 +489,7 @@
 <body>
 
   <header>
-    <div class="controls">
-      <button id="btn-settings">Settings</button>
-    </div>
+
     <div class="status-bar" id="status">P1's Turn: Spin the Dice!</div>
   </header>
 
@@ -513,8 +532,11 @@
   </div>
 
   <div class="footer-controls">
-    <div class="control-label">Vertical Spacing</div>
-    <input type="range" id="spacing-slider" min="50" max="400" value="200">
+    <button id="btn-settings" class="icon-btn" title="Settings">⚙️</button>
+    <div class="slider-container">
+      <div class="control-label">Vertical Spacing</div>
+      <input type="range" id="spacing-slider" min="50" max="400" value="200">
+    </div>
   </div>
 
   <div class="settings-overlay active" id="settings-overlay">
