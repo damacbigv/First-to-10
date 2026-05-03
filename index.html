@@ -2,9 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>First to 10: 3D Stacked Grid</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     :root {
       --bg-color: #08080a;
@@ -95,18 +93,59 @@
       width: 120px;
       height: 120px;
       margin: 20px auto;
+      perspective: 1000px;
       cursor: pointer;
       z-index: 10;
       filter: drop-shadow(0 0 20px rgba(255, 60, 60, 0.4));
-      border-radius: 50%;
-      transition: transform 0.2s, filter 0.2s;
+      transition: filter 0.3s, transform 0.2s;
     }
     .dice-container:active {
       transform: scale(0.9);
     }
     .dice-container.clickable {
-      filter: drop-shadow(0 0 30px rgba(255, 60, 60, 0.8));
+      filter: drop-shadow(0 0 30px rgba(255, 60, 60, 1));
     }
+    
+    .dice-wheel {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 2.5s cubic-bezier(0.1, 0.8, 0.1, 1);
+      transform: rotateX(0deg) rotateY(15deg) rotateZ(0deg);
+    }
+
+    .wheel-face {
+      position: absolute;
+      width: 120px;
+      height: 38px;
+      top: 41px;
+      background: linear-gradient(135deg, #ff1e1e, #aa0000);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 26px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 8px rgba(255,255,255,0.8);
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+      backface-visibility: hidden;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* 10 faces -> 36 deg. R = (38/2)/tan(18deg) = 19 / 0.3249 = 58.4px. Let's use 58.5px to be safe */
+    .wheel-face:nth-child(1) { transform: rotateX(0deg) translateZ(58.5px); }
+    .wheel-face:nth-child(2) { transform: rotateX(36deg) translateZ(58.5px); }
+    .wheel-face:nth-child(3) { transform: rotateX(72deg) translateZ(58.5px); }
+    .wheel-face:nth-child(4) { transform: rotateX(108deg) translateZ(58.5px); }
+    .wheel-face:nth-child(5) { transform: rotateX(144deg) translateZ(58.5px); }
+    .wheel-face:nth-child(6) { transform: rotateX(180deg) translateZ(58.5px); }
+    .wheel-face:nth-child(7) { transform: rotateX(216deg) translateZ(58.5px); }
+    .wheel-face:nth-child(8) { transform: rotateX(252deg) translateZ(58.5px); }
+    .wheel-face:nth-child(9) { transform: rotateX(288deg) translateZ(58.5px); }
+    .wheel-face:nth-child(10) { transform: rotateX(324deg) translateZ(58.5px); }
 
     /* --- GAME BOARD --- */
     .game-area {
@@ -427,6 +466,18 @@
   </header>
 
   <div class="dice-container" id="dice-container">
+    <div class="dice-wheel" id="dice-wheel">
+      <div class="wheel-face">1</div>
+      <div class="wheel-face">2</div>
+      <div class="wheel-face">3</div>
+      <div class="wheel-face">4</div>
+      <div class="wheel-face">5</div>
+      <div class="wheel-face">6</div>
+      <div class="wheel-face">7</div>
+      <div class="wheel-face">8</div>
+      <div class="wheel-face"><span style="text-decoration: underline">9</span></div>
+      <div class="wheel-face">0</div>
+    </div>
   </div>
 
   <div class="game-area" id="game-area">
@@ -501,91 +552,9 @@
     const btnCloseSettings = document.getElementById('btn-close-settings');
     const spacingSlider = document.getElementById('spacing-slider');
 
-    // --- THREE.JS DICE SETUP ---
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.z = 4;
+    const diceWheel = document.getElementById('dice-wheel');
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(120, 120);
-    diceContainer.appendChild(renderer.domElement);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight);
-    const pointLight = new THREE.PointLight(0xffffff, 0.6);
-    pointLight.position.set(5, 5, 5);
-    scene.add(pointLight);
-
-    function createDiceMaterial(num) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#cc0e0e';
-      ctx.fillRect(0, 0, 128, 128);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(4, 4, 120, 120);
-      
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 50px "Space Grotesk", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(num === 9 ? '9_' : num, 64, 64);
-
-      const texture = new THREE.CanvasTexture(canvas);
-      return new THREE.MeshStandardMaterial({
-          map: texture,
-          roughness: 0.2,
-          metalness: 0.1,
-          flatShading: true
-      });
-    }
-
-    const numbers = [1,2,3,4,5,6,7,8,9,1,2,3]; // 12 faces
-    const materials = [];
-    for(let i=0; i<12; i++) {
-        materials.push(createDiceMaterial(numbers[i]));
-    }
-
-    const geometry = new THREE.DodecahedronGeometry(1.2, 0);
-    
-    // Assign materials (12 faces, 36 triangles, 3 triangles per pentagon)
-    for (let i = 0; i < 12; i++) {
-        geometry.addGroup(i * 9, 9, i);
-    }
-    
-    const diceMesh = new THREE.Mesh(geometry, materials);
-    scene.add(diceMesh);
-
-    // Compute face centers to orient dice
-    const faceCenters = [];
-    const positionAttribute = geometry.getAttribute('position');
-    for(let i=0; i<12; i++) {
-        const v1 = new THREE.Vector3().fromBufferAttribute(positionAttribute, i*9);
-        const v2 = new THREE.Vector3().fromBufferAttribute(positionAttribute, i*9 + 1);
-        const v3 = new THREE.Vector3().fromBufferAttribute(positionAttribute, i*9 + 2);
-        const center = new THREE.Vector3().addVectors(v1, v2).add(v3).divideScalar(3);
-        faceCenters.push(center.normalize());
-    }
-
-    let isSpinning3D = false;
-    let targetQuaternion = new THREE.Quaternion();
-
-    function animateDice() {
-        requestAnimationFrame(animateDice);
-        if (isSpinning3D) {
-            diceMesh.rotation.x += 0.2;
-            diceMesh.rotation.y += 0.3;
-        } else if (currentDiceValue !== null && !isSpinning) {
-            diceMesh.quaternion.slerp(targetQuaternion, 0.1);
-        } else {
-            diceMesh.rotation.x += 0.005;
-            diceMesh.rotation.y += 0.01;
-        }
-        renderer.render(scene, camera);
-    }
-    animateDice();
+    let diceRotationX = 0;
 
     // --- SETTINGS & UI ---
     btnSettings.addEventListener('click', () => {
@@ -700,33 +669,30 @@
     function spinDice() {
       if (isSpinning || currentDiceValue !== null || gameOver) return;
       isSpinning = true;
-      isSpinning3D = true;
       diceContainer.classList.remove('clickable');
 
       const result = Math.floor(Math.random() * 9) + 1; // 1 to 9
+      
+      const nums = [1,2,3,4,5,6,7,8,9,0];
+      const faceIndex = nums.indexOf(result);
+      
+      const targetAngle = 360 - (faceIndex * 36);
+      
+      const currentSpins = Math.floor(diceRotationX / 360);
+      diceRotationX = (currentSpins + 3) * 360 + targetAngle;
+      
+      diceWheel.style.transform = `rotateX(${diceRotationX}deg) rotateY(15deg) rotateZ(0deg)`;
 
       setTimeout(() => {
-        isSpinning3D = false;
         isSpinning = false;
         currentDiceValue = result;
         
-        const possibleFaces = [];
-        for(let i=0; i<12; i++) {
-            if (numbers[i] === result) possibleFaces.push(i);
-        }
-        if (possibleFaces.length === 0) possibleFaces.push(0);
-        const chosenFace = possibleFaces[Math.floor(Math.random() * possibleFaces.length)];
-        
-        targetQuaternion.setFromUnitVectors(faceCenters[chosenFace], new THREE.Vector3(0, 0, 1));
-        const randomZ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.random() * Math.PI * 2);
-        targetQuaternion.multiply(randomZ);
-
         updateStatus();
 
         if (mode === '1p' && currentPlayer === 2) {
           setTimeout(cpuMove, 1000);
         }
-      }, 1000); 
+      }, 2500); 
     }
 
     diceContainer.addEventListener('click', spinDice);
