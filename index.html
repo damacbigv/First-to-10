@@ -689,7 +689,7 @@
       const targetAngle = -(faceIndex * 40);
       
       const currentSpins = Math.floor(diceRotationY / 360);
-      diceRotationY = (currentSpins - 3) * 360 + targetAngle;
+      diceRotationY = (currentSpins + 4) * 360 + targetAngle;
       
       diceWheel.style.transform = `rotateX(0deg) rotateY(${diceRotationY}deg) rotateZ(0deg)`;
 
