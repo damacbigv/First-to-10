@@ -472,6 +472,53 @@
       margin: 20px 0 30px 0;
     }
 
+    /* --- RULES --- */
+    .rules-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .rules-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .rules-content {
+      background: #111;
+      border: 1px solid var(--neon-cyan);
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+      max-width: 90%;
+      width: 400px;
+    }
+    .rules-content h2 {
+      margin-top: 0;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+    .rules-list {
+      text-align: left;
+      color: #ccc;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      padding-left: 20px;
+    }
+    .rules-list li {
+      margin-bottom: 10px;
+    }
+
     .play-again-btn {
       position: absolute;
       bottom: 10%;
@@ -537,6 +584,7 @@
       <div class="control-label">Vertical Spacing</div>
       <input type="range" id="spacing-slider" min="50" max="400" value="200">
     </div>
+    <button id="btn-rules" class="icon-btn" title="Rules">❓</button>
   </div>
 
   <div class="settings-overlay active" id="settings-overlay">
@@ -548,6 +596,19 @@
         <button id="btn-2p" class="active">2 Player (Local)</button>
       </div>
       <button id="btn-close-settings">Start Game</button>
+    </div>
+  </div>
+
+  <div class="rules-overlay" id="rules-overlay">
+    <div class="rules-content">
+      <h2>How to Play</h2>
+      <ul class="rules-list">
+        <li>Click the dice reel to spin and get a number (1-9).</li>
+        <li>Place your number in any empty cell on the 3D grid.</li>
+        <li><strong>Win Condition:</strong> Be the first to complete a straight line (horizontal, vertical, or diagonal) of 3 numbers that sum up to exactly <strong>10</strong>.</li>
+        <li>Lines can span across the three vertical layers!</li>
+      </ul>
+      <button id="btn-close-rules">Got it!</button>
     </div>
   </div>
 
@@ -580,6 +641,9 @@
     const btnSettings = document.getElementById('btn-settings');
     const settingsOverlay = document.getElementById('settings-overlay');
     const btnCloseSettings = document.getElementById('btn-close-settings');
+    const btnRules = document.getElementById('btn-rules');
+    const rulesOverlay = document.getElementById('rules-overlay');
+    const btnCloseRules = document.getElementById('btn-close-rules');
     const spacingSlider = document.getElementById('spacing-slider');
 
     const diceWheel = document.getElementById('dice-wheel');
@@ -592,6 +656,13 @@
     });
     btnCloseSettings.addEventListener('click', () => {
       settingsOverlay.classList.remove('active');
+    });
+
+    btnRules.addEventListener('click', () => {
+      rulesOverlay.classList.add('active');
+    });
+    btnCloseRules.addEventListener('click', () => {
+      rulesOverlay.classList.remove('active');
     });
 
     spacingSlider.addEventListener('input', (e) => {
