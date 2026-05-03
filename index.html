@@ -451,11 +451,20 @@
       text-align: center;
       box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
     }
+    .settings-content h1 {
+      margin: 0 0 20px 0;
+      font-size: 3rem;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: #fff;
+      text-shadow: 0 0 20px var(--neon-cyan);
+    }
     .settings-content h2 {
       margin-top: 0;
       color: #fff;
       text-transform: uppercase;
       letter-spacing: 2px;
+      font-size: 1.2rem;
     }
     .settings-options {
       display: flex;
@@ -481,7 +490,6 @@
 <body>
 
   <header>
-    <h1>First to 10</h1>
     <div class="controls">
       <button id="btn-settings">Settings</button>
     </div>
@@ -536,14 +544,15 @@
     <input type="range" id="spacing-slider" min="50" max="400" value="200">
   </div>
 
-  <div class="settings-overlay" id="settings-overlay">
+  <div class="settings-overlay active" id="settings-overlay">
     <div class="settings-content">
+      <h1>First to 10</h1>
       <h2>Game Mode</h2>
       <div class="settings-options">
         <button id="btn-1p">1 Player (vs CPU)</button>
         <button id="btn-2p" class="active">2 Player (Local)</button>
       </div>
-      <button id="btn-close-settings">Close Settings</button>
+      <button id="btn-close-settings">Start Game</button>
     </div>
   </div>
 
