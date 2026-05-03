@@ -107,20 +107,6 @@
     .dice-container.clickable {
       filter: drop-shadow(0 0 30px rgba(255, 60, 60, 0.8));
     }
-    .dice-result-overlay {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      color: #fff;
-      font-size: 3.5rem;
-      font-weight: bold;
-      font-family: 'Space Grotesk', sans-serif;
-      text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 5px #ff003c;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 5;
-    }
 
     /* --- GAME BOARD --- */
     .game-area {
@@ -441,7 +427,6 @@
   </header>
 
   <div class="dice-container" id="dice-container">
-    <div class="dice-result-overlay" id="dice-result-overlay"></div>
   </div>
 
   <div class="game-area" id="game-area">
@@ -505,7 +490,6 @@
     const btn2p = document.getElementById('btn-2p');
     const statusEl = document.getElementById('status');
     const diceContainer = document.getElementById('dice-container');
-    const diceResultOverlay = document.getElementById('dice-result-overlay');
     const boardEl = document.getElementById('board');
     const gameArea = document.getElementById('game-area');
     const winOverlay = document.getElementById('win-overlay');
@@ -526,28 +510,75 @@
     renderer.setSize(120, 120);
     diceContainer.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
-    const pointLight = new THREE.PointLight(0xffffff, 0.8);
+    const pointLight = new THREE.PointLight(0xffffff, 0.6);
     pointLight.position.set(5, 5, 5);
     scene.add(pointLight);
 
-    const geometry = new THREE.IcosahedronGeometry(1.2, 0);
-    const material = new THREE.MeshStandardMaterial({
-        color: 0xff1111,
-        roughness: 0.2,
-        metalness: 0.1,
-        flatShading: true
-    });
-    const diceMesh = new THREE.Mesh(geometry, material);
+    function createDiceMaterial(num) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#cc0e0e';
+      ctx.fillRect(0, 0, 128, 128);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(4, 4, 120, 120);
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 50px "Space Grotesk", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(num === 9 ? '9_' : num, 64, 64);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      return new THREE.MeshStandardMaterial({
+          map: texture,
+          roughness: 0.2,
+          metalness: 0.1,
+          flatShading: true
+      });
+    }
+
+    const numbers = [1,2,3,4,5,6,7,8,9,1,2,3]; // 12 faces
+    const materials = [];
+    for(let i=0; i<12; i++) {
+        materials.push(createDiceMaterial(numbers[i]));
+    }
+
+    const geometry = new THREE.DodecahedronGeometry(1.2, 0);
+    
+    // Assign materials (12 faces, 36 triangles, 3 triangles per pentagon)
+    for (let i = 0; i < 12; i++) {
+        geometry.addGroup(i * 9, 9, i);
+    }
+    
+    const diceMesh = new THREE.Mesh(geometry, materials);
     scene.add(diceMesh);
 
+    // Compute face centers to orient dice
+    const faceCenters = [];
+    const positionAttribute = geometry.getAttribute('position');
+    for(let i=0; i<12; i++) {
+        const v1 = new THREE.Vector3().fromBufferAttribute(positionAttribute, i*9);
+        const v2 = new THREE.Vector3().fromBufferAttribute(positionAttribute, i*9 + 1);
+        const v3 = new THREE.Vector3().fromBufferAttribute(positionAttribute, i*9 + 2);
+        const center = new THREE.Vector3().addVectors(v1, v2).add(v3).divideScalar(3);
+        faceCenters.push(center.normalize());
+    }
+
     let isSpinning3D = false;
+    let targetQuaternion = new THREE.Quaternion();
+
     function animateDice() {
         requestAnimationFrame(animateDice);
         if (isSpinning3D) {
             diceMesh.rotation.x += 0.2;
             diceMesh.rotation.y += 0.3;
+        } else if (currentDiceValue !== null && !isSpinning) {
+            diceMesh.quaternion.slerp(targetQuaternion, 0.1);
         } else {
             diceMesh.rotation.x += 0.005;
             diceMesh.rotation.y += 0.01;
@@ -671,7 +702,6 @@
       isSpinning = true;
       isSpinning3D = true;
       diceContainer.classList.remove('clickable');
-      diceResultOverlay.style.opacity = '0';
 
       const result = Math.floor(Math.random() * 9) + 1; // 1 to 9
 
@@ -680,15 +710,23 @@
         isSpinning = false;
         currentDiceValue = result;
         
-        diceResultOverlay.textContent = result;
-        diceResultOverlay.style.opacity = '1';
+        const possibleFaces = [];
+        for(let i=0; i<12; i++) {
+            if (numbers[i] === result) possibleFaces.push(i);
+        }
+        if (possibleFaces.length === 0) possibleFaces.push(0);
+        const chosenFace = possibleFaces[Math.floor(Math.random() * possibleFaces.length)];
+        
+        targetQuaternion.setFromUnitVectors(faceCenters[chosenFace], new THREE.Vector3(0, 0, 1));
+        const randomZ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.random() * Math.PI * 2);
+        targetQuaternion.multiply(randomZ);
 
         updateStatus();
 
         if (mode === '1p' && currentPlayer === 2) {
-          setTimeout(cpuMove, 500);
+          setTimeout(cpuMove, 1000);
         }
-      }, 2000); 
+      }, 1000); 
     }
 
     diceContainer.addEventListener('click', spinDice);
@@ -760,7 +798,6 @@
     function endGame(winnerPlayer, winLine) {
       gameOver = true;
       clearValidTargets();
-      spinBtn.disabled = true;
 
       if (winLine) {
         winLine.forEach(idx => {
