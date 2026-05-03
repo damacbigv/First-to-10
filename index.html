@@ -17,9 +17,9 @@
 
     @media (max-width: 480px) {
       :root {
-        --grid-size: 260px;
-        --cell-size: 75px;
-        --layer-gap: 120px;
+        --grid-size: 240px;
+        --cell-size: 70px;
+        --layer-gap: 100px;
       }
       .status-bar { font-size: 1rem; }
       .dice-container { height: 70px; }
@@ -44,6 +44,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      height: 100dvh;
       width: 100vw;
     }
 
@@ -174,6 +175,7 @@
       perspective: 1000px;
       overflow: hidden;
       position: relative;
+      min-height: 0;
     }
 
     .board-rotation-wrapper {
