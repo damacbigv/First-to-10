@@ -10,9 +10,9 @@
       --neon-cyan: #00f3ff;
       --neon-magenta: #ff003c;
       --neon-yellow: #fffb00;
-      --grid-size: clamp(260px, 65vmin, 400px);
+      --grid-size: 65vmin;
       --cell-size: calc(var(--grid-size) / 3.5);
-      --layer-gap: clamp(100px, 18vmin, 180px);
+      --layer-gap: 20vmin;
     }
 
     @media (max-width: 480px) {
@@ -20,10 +20,9 @@
         --grid-size: 60vmin; 
         --layer-gap: 35vmin;
       }
-      .status-bar { font-size: 1rem; }
-      .dice-container { height: 70px; }
-      .wheel-face { height: 100px; width: 40px; font-size: 20px; }
-      .icon-btn { font-size: 1.5rem; }
+      .status-bar { font-size: 4vmin; }
+      .dice-container { height: 15vmin; }
+      .icon-btn { font-size: 6vmin; }
     }
 
 
@@ -109,9 +108,9 @@
     /* --- DICE --- */
     .dice-container {
       position: relative;
-      width: 120px;
-      height: 80px;
-      margin: 20px auto;
+      width: 20vmin;
+      height: 12vmin;
+      margin: 3vmin auto;
       perspective: 1000px;
       cursor: pointer;
       z-index: 10;
@@ -136,17 +135,17 @@
 
     .wheel-face {
       position: absolute;
-      width: 48px;
-      height: 80px;
+      width: 8vmin;
+      height: 12vmin;
       top: 0px;
-      left: 36px;
+      left: 6vmin;
       background: linear-gradient(135deg, #ff1e1e, #aa0000);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 6px;
+      border: 0.2vmin solid rgba(255, 255, 255, 0.3);
+      border-radius: 1vmin;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 26px;
+      font-size: 5vmin;
       font-weight: bold;
       color: white;
       text-shadow: 0 0 8px rgba(255,255,255,0.8);
@@ -165,15 +164,16 @@
     }
 
     /* 9 faces -> 40 deg. R = (48/2)/tan(20deg) = 24 / 0.36397 = 65.9px. Let's use 66px */
-    .wheel-face:nth-child(1) { transform: rotateY(0deg) translateZ(66px); }
-    .wheel-face:nth-child(2) { transform: rotateY(40deg) translateZ(66px); }
-    .wheel-face:nth-child(3) { transform: rotateY(80deg) translateZ(66px); }
-    .wheel-face:nth-child(4) { transform: rotateY(120deg) translateZ(66px); }
-    .wheel-face:nth-child(5) { transform: rotateY(160deg) translateZ(66px); }
-    .wheel-face:nth-child(6) { transform: rotateY(200deg) translateZ(66px); }
-    .wheel-face:nth-child(7) { transform: rotateY(240deg) translateZ(66px); }
-    .wheel-face:nth-child(8) { transform: rotateY(280deg) translateZ(66px); }
-    .wheel-face:nth-child(9) { transform: rotateY(320deg) translateZ(66px); }
+    /* 9 faces -> 40 deg. R = (8vmin/2)/tan(20deg) = 4 / 0.36397 = 10.99vmin. Let's use 11vmin */
+    .wheel-face:nth-child(1) { transform: rotateY(0deg) translateZ(11vmin); }
+    .wheel-face:nth-child(2) { transform: rotateY(40deg) translateZ(11vmin); }
+    .wheel-face:nth-child(3) { transform: rotateY(80deg) translateZ(11vmin); }
+    .wheel-face:nth-child(4) { transform: rotateY(120deg) translateZ(11vmin); }
+    .wheel-face:nth-child(5) { transform: rotateY(160deg) translateZ(11vmin); }
+    .wheel-face:nth-child(6) { transform: rotateY(200deg) translateZ(11vmin); }
+    .wheel-face:nth-child(7) { transform: rotateY(240deg) translateZ(11vmin); }
+    .wheel-face:nth-child(8) { transform: rotateY(280deg) translateZ(11vmin); }
+    .wheel-face:nth-child(9) { transform: rotateY(320deg) translateZ(11vmin); }
 
     /* --- GAME BOARD --- */
     .game-area {
@@ -398,7 +398,7 @@
       background: transparent;
       border: none;
       color: #888;
-      font-size: 1.8rem;
+      font-size: 5vmin;
       cursor: pointer;
       padding: 5px;
       transition: all 0.2s;
@@ -422,7 +422,7 @@
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
-      width: 200px;
+      width: 30vmin;
       background: transparent;
     }
 
