@@ -27,31 +27,48 @@
     }
 
 
-    html, body {
-      margin: 0;
-      padding: 0;
+    /* --- VIEWPORT BOUNDARY --- */
+    .app-shell {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       overflow: hidden;
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
     }
-
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: none; /* Prevent browser handling of touch gestures */
+    .app-shell::before {
+      content: '';
+      position: absolute;
+      top: -10%; left: -10%; width: 120%; height: 120%;
+      background: radial-gradient(circle, #1a1a2e 0%, #08080a 100%);
+      opacity: 0.5;
+      filter: blur(50px);
+    }
+    .main-viewport {
+      width: 100%;
+      max-width: 500px; /* Constrain on desktop */
+      height: 100%;
+      background: var(--bg-color);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 100px rgba(0,0,0,0.5);
+      border-left: 1px solid rgba(255,255,255,0.05);
+      border-right: 1px solid rgba(255,255,255,0.05);
+      overflow: hidden;
     }
 
     body {
       margin: 0;
       padding: 0;
-      background-color: var(--bg-color);
+      background-color: #000;
       color: #fff;
       font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       overflow: hidden;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       height: 100vh;
       height: 100dvh;
       width: 100vw;
@@ -607,6 +624,61 @@
       50% { opacity: 0.6; transform: scale(1.1); }
     }
 
+    /* --- SCREEN SHAKE & JUICE --- */
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0,0); }
+      10%, 30%, 50%, 70%, 90% { transform: translate(-4px, 2px); }
+      20%, 40%, 60%, 80% { transform: translate(4px, -2px); }
+    }
+    .shake { animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--neon-cyan);
+      pointer-events: none;
+      border-radius: 50%;
+      z-index: 100;
+    }
+
+    .ghost-number {
+      position: absolute;
+      font-size: 3rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 0 20px var(--neon-cyan);
+      pointer-events: none;
+      z-index: 200;
+      animation: ghostUp 0.8s ease-out forwards;
+    }
+    @keyframes ghostUp {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      100% { transform: translate(-50%, -150%) scale(1.5); opacity: 0; }
+    }
+
+    /* --- OVERLAY TRANSITIONS --- */
+    .rules-overlay, .settings-overlay, .visual-tutorial, .win-overlay {
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s;
+      display: flex !important; /* Always flex but controlled by visibility */
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .rules-overlay.active, .settings-overlay.active, .visual-tutorial.active, .win-overlay.active {
+      visibility: visible;
+      opacity: 1;
+      pointer-events: all;
+    }
+    .rules-content, .settings-content, .win-content {
+      transform: scale(0.8) translateY(30px);
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .active .rules-content, .active .settings-content, .active .win-content {
+      transform: scale(1) translateY(0);
+    }
+
     /* --- SPIN HINT --- */
     .spin-hint {
       position: absolute;
@@ -694,8 +766,9 @@
   </style>
 </head>
 <body>
-
-  <div class="stars-container" id="stars-container"></div>
+  <div class="app-shell">
+    <div class="main-viewport" id="main-viewport">
+      <div class="stars-container" id="stars-container"></div>
 
   <!-- Background music is now generated procedurally via Web Audio API (zero external files) -->
 
@@ -1168,13 +1241,16 @@
     }
 
     function placePiece(idx) {
-      sounds.place();
       board[idx] = { value: currentDiceValue, player: currentPlayer };
-      
       const cellEl = document.querySelector(`.cell[data-idx="${idx}"]`);
       cellEl.querySelector('.content').textContent = currentDiceValue;
       cellEl.classList.add(`p${currentPlayer}`);
       
+      const rect = cellEl.getBoundingClientRect();
+      const viewportRect = document.getElementById('main-viewport').getBoundingClientRect();
+      triggerJuice(rect.left - viewportRect.left + rect.width/2, rect.top - viewportRect.top + rect.height/2);
+      
+      sounds.place();
       const winLine = checkWin();
       
       if (winLine) {
@@ -1335,26 +1411,66 @@
     // Background Stars
     function initStars() {
       const container = document.getElementById('stars-container');
-      const symbol = 'X';
-      for(let i=0; i<40; i++) {
+      const symbols = ['X', 'V+V'];
+      for(let i=0; i<50; i++) {
         const star = document.createElement('div');
         star.className = 'star';
-        star.textContent = symbol;
+        star.textContent = symbols[Math.floor(Math.random() * symbols.length)];
         star.style.left = Math.random() * 100 + '%';
         star.style.top = Math.random() * 100 + '%';
-        star.style.setProperty('--duration', (3 + Math.random() * 4) + 's');
-        star.style.fontSize = (8 + Math.random() * 10) + 'px';
+        star.style.setProperty('--duration', (4 + Math.random() * 6) + 's');
+        star.style.fontSize = (star.textContent === 'X' ? (8 + Math.random() * 10) : (6 + Math.random() * 6)) + 'px';
         container.appendChild(star);
       }
     }
 
-    // Initialize
+    // --- JUICE ENGINE ---
+    function triggerJuice(x, y, intensity = 'light') {
+      const viewport = document.getElementById('main-viewport');
+      
+      // Screen Shake
+      viewport.classList.remove('shake');
+      void viewport.offsetWidth; // Trigger reflow
+      viewport.classList.add('shake');
+      
+      // Floating Ghost Number
+      if (x !== undefined && y !== undefined) {
+        const ghost = document.createElement('div');
+        ghost.className = 'ghost-number';
+        ghost.textContent = currentDiceValue;
+        ghost.style.left = x + 'px';
+        ghost.style.top = y + 'px';
+        viewport.appendChild(ghost);
+        setTimeout(() => ghost.remove(), 800);
+        
+        // Particle Burst
+        for(let i=0; i<12; i++) {
+          const p = document.createElement('div');
+          p.className = 'particle';
+          p.style.left = x + 'px';
+          p.style.top = y + 'px';
+          viewport.appendChild(p);
+          
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 30 + Math.random() * 50;
+          const tx = Math.cos(angle) * dist;
+          const ty = Math.sin(angle) * dist;
+          
+          p.animate([
+            { transform: 'translate(0,0) scale(1)', opacity: 1 },
+            { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+          ], { duration: 400 + Math.random() * 400, easing: 'ease-out' }).onfinish = () => p.remove();
+        }
+      }
+    }
+
     initStars();
     updateStatus();
-
-    // Show rules automatically on every fresh load
     rulesOverlay.classList.add('active');
 
+    // Close the viewport container
   </script>
+</div>
+</div>
 </body>
 </html>
