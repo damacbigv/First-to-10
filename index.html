@@ -11,19 +11,19 @@
       --neon-cyan: #00f3ff;
       --neon-magenta: #ff003c;
       --neon-yellow: #fffb00;
-      --grid-size: clamp(150px, 25vmin, 280px);
+      --grid-size: clamp(150px, 30vmin, 260px);
       --cell-size: calc(var(--grid-size) / 3.5);
-      --layer-gap: clamp(80px, 15vmin, 120px);
+      --layer-gap: clamp(100px, 20vmin, 150px);
     }
 
     @media (max-width: 480px) {
       :root {
-        --grid-size: 40vmin; 
-        --layer-gap: 28vmin;
+        --grid-size: 45vmin; 
+        --layer-gap: 35vmin;
       }
-      .status-bar { font-size: 4vmin; }
-      .dice-container { height: 10vmin; }
-      .icon-btn { font-size: 6vmin; }
+      .status-bar { font-size: 3.5vmin; }
+      .dice-container { height: 8vmin; }
+      .icon-btn { font-size: 5.5vmin; }
     }
 
 
@@ -117,10 +117,17 @@
     }
 
     .status-bar {
-      text-align: center;
-      font-size: 1.2rem;
-      margin-top: 10px;
-      height: 30px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 8px 16px;
+      margin: 10px auto;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      border-radius: 20px;
+      display: inline-block;
+      backdrop-filter: blur(5px);
+      color: #fff;
       text-shadow: 0 0 5px currentColor;
     }
 
@@ -130,20 +137,12 @@
     /* --- DICE --- */
     .dice-container {
       position: relative;
-      width: 6vmin;
-      height: 3vmin;
-      margin: 0.5vmin auto;
+      width: 60px;
+      height: 60px;
+      margin: 5px auto;
       perspective: 1000px;
       cursor: pointer;
       z-index: 10;
-      filter: drop-shadow(0 0 20px rgba(255, 60, 60, 0.4));
-      transition: filter 0.3s, transform 0.2s;
-    }
-    .dice-container:active {
-      transform: scale(0.9);
-    }
-    .dice-container.clickable {
-      filter: drop-shadow(0 0 30px rgba(255, 60, 60, 1));
     }
     
     .dice-wheel {
@@ -157,25 +156,32 @@
 
     .wheel-face {
       position: absolute;
-      width: 8vmin;
-      height: 8vmin;
-      top: 0px;
-      left: 3.5vmin;
-      background: linear-gradient(135deg, #ff1e1e, #aa0000);
-      border: 0.2vmin solid rgba(255, 255, 255, 0.3);
-      border-radius: 1vmin;
+      width: 40px;
+      height: 40px;
+      left: 10px;
+      top: 10px;
+      background: linear-gradient(135deg, #ff3c3c 0%, #a00 100%);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 5vmin;
-      font-weight: bold;
-      color: white;
-      text-shadow: 0 0 8px rgba(255,255,255,0.8);
-      box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #fff;
       backface-visibility: hidden;
-      font-family: 'Space Grotesk', sans-serif;
-      transition: background 0.3s, color 0.3s, box-shadow 0.3s, border 0.3s;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
     }
+
+    .wheel-face:nth-child(1) { transform: rotateY(0deg) translateZ(55px); }
+    .wheel-face:nth-child(2) { transform: rotateY(40deg) translateZ(55px); }
+    .wheel-face:nth-child(3) { transform: rotateY(80deg) translateZ(55px); }
+    .wheel-face:nth-child(4) { transform: rotateY(120deg) translateZ(55px); }
+    .wheel-face:nth-child(5) { transform: rotateY(160deg) translateZ(55px); }
+    .wheel-face:nth-child(6) { transform: rotateY(200deg) translateZ(55px); }
+    .wheel-face:nth-child(7) { transform: rotateY(240deg) translateZ(55px); }
+    .wheel-face:nth-child(8) { transform: rotateY(280deg) translateZ(55px); }
+    .wheel-face:nth-child(9) { transform: rotateY(320deg) translateZ(55px); }
 
     .wheel-face.highlight {
       background: var(--neon-yellow);
@@ -184,18 +190,6 @@
       box-shadow: 0 0 30px var(--neon-yellow), inset 0 0 10px rgba(0,0,0,0.5);
       border-color: #fff;
     }
-
-    /* 9 faces -> 40 deg. R = (48/2)/tan(20deg) = 24 / 0.36397 = 65.9px. Let's use 66px */
-    /* 9 faces -> 40 deg. R = (8vmin/2)/tan(20deg) = 4 / 0.36397 = 10.99vmin. Let's use 11vmin */
-    .wheel-face:nth-child(1) { transform: rotateY(0deg) translateZ(11vmin); }
-    .wheel-face:nth-child(2) { transform: rotateY(40deg) translateZ(11vmin); }
-    .wheel-face:nth-child(3) { transform: rotateY(80deg) translateZ(11vmin); }
-    .wheel-face:nth-child(4) { transform: rotateY(120deg) translateZ(11vmin); }
-    .wheel-face:nth-child(5) { transform: rotateY(160deg) translateZ(11vmin); }
-    .wheel-face:nth-child(6) { transform: rotateY(200deg) translateZ(11vmin); }
-    .wheel-face:nth-child(7) { transform: rotateY(240deg) translateZ(11vmin); }
-    .wheel-face:nth-child(8) { transform: rotateY(280deg) translateZ(11vmin); }
-    .wheel-face:nth-child(9) { transform: rotateY(320deg) translateZ(11vmin); }
 
     /* --- GAME BOARD --- */
     .game-area {
@@ -209,17 +203,7 @@
     }
 
     .watermark-10 {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 40vmin;
-      font-weight: 900;
-      color: rgba(255, 255, 255, 0.03);
-      pointer-events: none;
-      z-index: 0;
-      user-select: none;
-      letter-spacing: -2vmin;
-      font-style: italic;
+      display: none;
     }
 
     .board-rotation-wrapper {
@@ -819,12 +803,11 @@
       <div class="wheel-face">6</div>
       <div class="wheel-face">7</div>
       <div class="wheel-face">8</div>
-      <div class="wheel-face"><span style="text-decoration: underline">9</span></div>
+      <div class="wheel-face">9</div>
     </div>
   </div>
 
   <div class="game-area" id="game-area">
-    <div class="watermark-10">10</div>
     <div class="board-rotation-wrapper" id="board">
       
       <!-- Top Layer (Z=2) -->
@@ -852,7 +835,7 @@
     <button id="btn-settings" class="icon-btn" title="Settings">⚙️</button>
     <div class="slider-container">
       <div class="control-label">Vertical Spacing</div>
-      <input type="range" id="spacing-slider" min="50" max="400" value="200">
+      <input type="range" id="spacing-slider" min="100" max="400" value="200">
     </div>
     <button id="btn-rules" class="icon-btn" title="Rules">❓</button>
   </div>
