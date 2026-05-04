@@ -11,18 +11,18 @@
       --neon-cyan: #00f3ff;
       --neon-magenta: #ff003c;
       --neon-yellow: #fffb00;
-      --grid-size: clamp(180px, 32vmin, 320px);
+      --grid-size: clamp(150px, 25vmin, 280px);
       --cell-size: calc(var(--grid-size) / 3.5);
-      --layer-gap: clamp(100px, 18vmin, 160px);
+      --layer-gap: clamp(80px, 15vmin, 120px);
     }
 
     @media (max-width: 480px) {
       :root {
-        --grid-size: 45vmin; 
-        --layer-gap: 32vmin;
+        --grid-size: 40vmin; 
+        --layer-gap: 28vmin;
       }
       .status-bar { font-size: 4vmin; }
-      .dice-container { height: 12vmin; }
+      .dice-container { height: 10vmin; }
       .icon-btn { font-size: 6vmin; }
     }
 
@@ -31,14 +31,28 @@
     .app-shell {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: #000;
+      background: #ffffff; /* Clean White Outside */
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
     }
-    /* CRT Scanline Effect */
-    .app-shell::after {
+    .main-viewport {
+      width: 100%;
+      max-width: 420px; /* Slimmer for better fit */
+      height: 100%;
+      background: var(--bg-color);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 50px rgba(0,0,0,0.3);
+      border-left: 1px solid rgba(255,255,255,0.05);
+      border-right: 1px solid rgba(255,255,255,0.05);
+      overflow: hidden;
+      transform: translate(0,0);
+    }
+    /* CRT Scanline Effect (Inside Viewport Only) */
+    .main-viewport::after {
       content: " ";
       position: absolute;
       top: 0; left: 0; bottom: 0; right: 0;
@@ -46,29 +60,7 @@
       z-index: 10000;
       background-size: 100% 4px, 3px 100%;
       pointer-events: none;
-      opacity: 0.3;
-    }
-    .app-shell::before {
-      content: '';
-      position: absolute;
-      top: -10%; left: -10%; width: 120%; height: 120%;
-      background: radial-gradient(circle, #1a1a2e 0%, #08080a 100%);
-      opacity: 0.5;
-      filter: blur(50px);
-    }
-    .main-viewport {
-      width: 100%;
-      max-width: 500px;
-      height: 100%;
-      background: var(--bg-color);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 0 100px rgba(0,0,0,0.5);
-      border-left: 1px solid rgba(255,255,255,0.05);
-      border-right: 1px solid rgba(255,255,255,0.05);
-      overflow: hidden;
-      transform: translate(0,0); /* For shake */
+      opacity: 0.2;
     }
 
     body {
@@ -138,9 +130,9 @@
     /* --- DICE --- */
     .dice-container {
       position: relative;
-      width: 12vmin;
-      height: 6vmin;
-      margin: 1.5vmin auto;
+      width: 8vmin;
+      height: 4vmin;
+      margin: 1vmin auto;
       perspective: 1000px;
       cursor: pointer;
       z-index: 10;
@@ -721,7 +713,7 @@
     /* --- SPIN HINT --- */
     .spin-hint {
       position: absolute;
-      bottom: -32px;
+      bottom: -22px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 0.7rem;
