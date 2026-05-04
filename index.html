@@ -109,7 +109,7 @@
     .dice-container {
       position: relative;
       width: 20vmin;
-      height: 12vmin;
+      height: 10vmin;
       margin: 3vmin auto;
       perspective: 1000px;
       cursor: pointer;
@@ -135,10 +135,10 @@
 
     .wheel-face {
       position: absolute;
-      width: 8vmin;
-      height: 12vmin;
+      width: 10vmin;
+      height: 10vmin;
       top: 0px;
-      left: 6vmin;
+      left: 5vmin;
       background: linear-gradient(135deg, #ff1e1e, #aa0000);
       border: 0.2vmin solid rgba(255, 255, 255, 0.3);
       border-radius: 1vmin;
@@ -164,16 +164,16 @@
     }
 
     /* 9 faces -> 40 deg. R = (48/2)/tan(20deg) = 24 / 0.36397 = 65.9px. Let's use 66px */
-    /* 9 faces -> 40 deg. R = (8vmin/2)/tan(20deg) = 4 / 0.36397 = 10.99vmin. Let's use 11vmin */
-    .wheel-face:nth-child(1) { transform: rotateY(0deg) translateZ(11vmin); }
-    .wheel-face:nth-child(2) { transform: rotateY(40deg) translateZ(11vmin); }
-    .wheel-face:nth-child(3) { transform: rotateY(80deg) translateZ(11vmin); }
-    .wheel-face:nth-child(4) { transform: rotateY(120deg) translateZ(11vmin); }
-    .wheel-face:nth-child(5) { transform: rotateY(160deg) translateZ(11vmin); }
-    .wheel-face:nth-child(6) { transform: rotateY(200deg) translateZ(11vmin); }
-    .wheel-face:nth-child(7) { transform: rotateY(240deg) translateZ(11vmin); }
-    .wheel-face:nth-child(8) { transform: rotateY(280deg) translateZ(11vmin); }
-    .wheel-face:nth-child(9) { transform: rotateY(320deg) translateZ(11vmin); }
+    /* 9 faces -> 40 deg. R = (10vmin/2)/tan(20deg) = 5 / 0.36397 = 13.7vmin */
+    .wheel-face:nth-child(1) { transform: rotateY(0deg) translateZ(14vmin); }
+    .wheel-face:nth-child(2) { transform: rotateY(40deg) translateZ(14vmin); }
+    .wheel-face:nth-child(3) { transform: rotateY(80deg) translateZ(14vmin); }
+    .wheel-face:nth-child(4) { transform: rotateY(120deg) translateZ(14vmin); }
+    .wheel-face:nth-child(5) { transform: rotateY(160deg) translateZ(14vmin); }
+    .wheel-face:nth-child(6) { transform: rotateY(200deg) translateZ(14vmin); }
+    .wheel-face:nth-child(7) { transform: rotateY(240deg) translateZ(14vmin); }
+    .wheel-face:nth-child(8) { transform: rotateY(280deg) translateZ(14vmin); }
+    .wheel-face:nth-child(9) { transform: rotateY(320deg) translateZ(14vmin); }
 
     /* --- GAME BOARD --- */
     .game-area {
