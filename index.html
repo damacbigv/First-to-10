@@ -633,8 +633,7 @@
 
   <div class="stars-container" id="stars-container"></div>
 
-  <!-- Ambient Background Music -->
-  <audio id="bg-music" loop preload="auto" src="https://cdn.pixabay.com/audio/2022/03/15/audio_783d1a0e70.mp3"></audio>
+  <!-- Background music is now generated procedurally via Web Audio API (zero external files) -->
 
   <header>
     <button id="btn-mute" class="mute-btn" title="Toggle Sound">🔊</button>
@@ -749,6 +748,78 @@
       osc.stop(audioCtx.currentTime + duration);
     }
 
+    // --- PROCEDURAL VIBE ENGINE (NO EXTERNAL MP3 NEEDED) ---
+    const vibeEngine = {
+      masterGain: audioCtx.createGain(),
+      isPlaying: false,
+      
+      init() {
+        this.masterGain.gain.value = 0.1; 
+        this.masterGain.connect(audioCtx.destination);
+      },
+      
+      start() {
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        this.init();
+        this.playSequence();
+      },
+
+      playSequence() {
+        if (!this.isPlaying) return;
+        
+        // Chill lo-fi progression (Am9 - D13 - Gmaj9 - Cmaj7)
+        const sequence = [
+          [220.00, 261.63, 329.63, 392.00], // Amin9
+          [146.83, 220.00, 311.13, 392.00], // D13
+          [196.00, 246.94, 293.66, 392.00], // Gmaj9
+          [261.63, 329.63, 392.00, 493.88]  // Cmaj7
+        ];
+        
+        let step = 0;
+        const playStep = () => {
+          if (!this.isPlaying || gameOver) return;
+          
+          const chord = sequence[step % sequence.length];
+          const now = audioCtx.currentTime;
+          
+          chord.forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            
+            osc.type = 'sine'; // Pure chill wave
+            osc.frequency.setValueAtTime(freq, now);
+            
+            // Soft envelope for pad feel
+            g.gain.setValueAtTime(0, now);
+            g.gain.linearRampToValueAtTime(0.04, now + 1.5);
+            g.gain.linearRampToValueAtTime(0, now + 4.5);
+            
+            osc.connect(g);
+            g.connect(this.masterGain);
+            
+            osc.start(now);
+            osc.stop(now + 5);
+          });
+
+          // Add a rhythmic "vibe" pulse
+          if (step % 2 === 0) {
+            playSynthSound(440, 'sine', 0.1, 0.01);
+          }
+          
+          step++;
+          setTimeout(playStep, 4500); 
+        };
+        
+        playStep();
+      },
+
+      setMuted(muted) {
+        this.masterGain.gain.setTargetAtTime(muted ? 0 : 0.1, audioCtx.currentTime, 0.2);
+      }
+    };
+
     const sounds = {
       tick: () => playSynthSound(800 + Math.random() * 100, 'sine', 0.05, 0.05),
       place: () => playSynthSound(400, 'triangle', 0.2, 0.1),
@@ -796,15 +867,11 @@
     const btnCloseRules = document.getElementById('btn-close-rules');
     const spacingSlider = document.getElementById('spacing-slider');
     const spinHint = document.getElementById('spin-hint');
-    const bgMusic = document.getElementById('bg-music');
-    bgMusic.volume = 0.4;
     const btnMute = document.getElementById('btn-mute');
     let isMuted = false;
 
     function ensureMusicPlays() {
-      if (!isMuted && bgMusic.paused) {
-        bgMusic.play().catch(e => console.log("Audio play blocked", e));
-      }
+      vibeEngine.start();
     }
 
     // Add button sounds
@@ -842,7 +909,7 @@
 
     btnMute.addEventListener('click', () => {
       isMuted = !isMuted;
-      bgMusic.muted = isMuted;
+      vibeEngine.setMuted(isMuted);
       btnMute.textContent = isMuted ? '🔇' : '🔊';
       btnMute.classList.toggle('muted', isMuted);
     });
