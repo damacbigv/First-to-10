@@ -981,7 +981,6 @@
 
     btnTutorialStart.addEventListener('click', () => {
       visualTutorial.classList.remove('active');
-      sessionStorage.setItem('tutorialSeen', 'true');
       settingsOverlay.classList.add('active');
       ensureMusicPlays();
     });
@@ -1352,14 +1351,8 @@
     initStars();
     updateStatus();
 
-    // Session logic for tutorial
-    if (!sessionStorage.getItem('tutorialSeen')) {
-      rulesOverlay.classList.add('active');
-    } else {
-      settingsOverlay.classList.add('active');
-      // If tutorial seen, we still need interaction to play music
-      document.addEventListener('click', () => ensureMusicPlays(), { once: true });
-    }
+    // Show rules automatically on every fresh load
+    rulesOverlay.classList.add('active');
 
   </script>
 </body>
