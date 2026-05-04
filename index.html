@@ -208,13 +208,26 @@
     /* --- GAME BOARD --- */
     .game-area {
       flex-grow: 1;
+      perspective: 1200px;
       display: flex;
       justify-content: center;
       align-items: center;
-      perspective: 1000px;
-      overflow: hidden;
       position: relative;
-      min-height: 0;
+      touch-action: none;
+    }
+
+    .watermark-10 {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 40vmin;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.03);
+      pointer-events: none;
+      z-index: 0;
+      user-select: none;
+      letter-spacing: -2vmin;
+      font-style: italic;
     }
 
     .board-rotation-wrapper {
@@ -225,6 +238,7 @@
       transform: rotateX(55deg) rotateZ(-25deg);
       transition: transform 0.1s ease-out;
       cursor: grab;
+      z-index: 1;
     }
 
     .board-rotation-wrapper:active {
@@ -305,15 +319,22 @@
       text-shadow: 0 0 10px currentColor;
     }
 
-    .cell.p1 { color: var(--neon-cyan); }
-    .cell.p2 { color: var(--neon-magenta); }
+    .cell.p1 { 
+      color: var(--neon-cyan); 
+      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan); 
+      font-weight: 800;
+    }
+    .cell.p2 { 
+      color: var(--neon-magenta); 
+      text-shadow: 0 0 10px var(--neon-magenta), 0 0 20px var(--neon-magenta); 
+      font-weight: 800;
+    }
 
     .cell.win-highlight {
-      background: rgba(255, 255, 255, 0.9);
-      color: #000;
-      text-shadow: none;
-      box-shadow: 0 0 20px #fff;
+      background: rgba(255, 255, 255, 0.2);
       border-color: #fff;
+      box-shadow: 0 0 20px #fff;
+      z-index: 10;
       transform: translateZ(10px);
     }
 
@@ -811,6 +832,7 @@
   </div>
 
   <div class="game-area" id="game-area">
+    <div class="watermark-10">10</div>
     <div class="board-rotation-wrapper" id="board">
       
       <!-- Top Layer (Z=2) -->
@@ -1445,6 +1467,11 @@
         star.style.top = Math.random() * 100 + '%';
         star.style.setProperty('--duration', (4 + Math.random() * 6) + 's');
         star.style.fontSize = (star.textContent === 'X' ? (8 + Math.random() * 10) : (6 + Math.random() * 6)) + 'px';
+        if (star.textContent === 'V+V') {
+          star.style.color = 'var(--neon-yellow)';
+          star.style.textShadow = '0 0 5px var(--neon-yellow)';
+          star.style.fontWeight = 'bold';
+        }
         container.appendChild(star);
       }
     }
