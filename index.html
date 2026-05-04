@@ -12,9 +12,9 @@
       --neon-cyan: #00f3ff;
       --neon-magenta: #ff003c;
       --neon-yellow: #fffb00;
-      --grid-size: clamp(150px, 28vmin, 250px);
+      --grid-size: clamp(180px, 35vmin, 320px);
       --cell-size: calc(var(--grid-size) / 3.5);
-      --layer-gap: clamp(120px, 25vmin, 180px);
+      --layer-gap: clamp(120px, 25vmin, 200px);
     }
 
     @media (max-width: 480px) {
@@ -495,7 +495,7 @@
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
-      width: 30vmin;
+      width: clamp(100px, 25vmin, 180px); /* Capped to prevent overflow */
       background: transparent;
     }
 
