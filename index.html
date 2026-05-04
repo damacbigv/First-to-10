@@ -634,7 +634,7 @@
   <div class="stars-container" id="stars-container"></div>
 
   <!-- Ambient Background Music -->
-  <audio id="bg-music" loop src="https://www.chosic.com/wp-content/uploads/2021/04/And-So-It-Begins-Inspired-By-Lo-Fi.mp3"></audio>
+  <audio id="bg-music" loop preload="auto" src="https://cdn.pixabay.com/audio/2022/03/15/audio_783d1a0e70.mp3"></audio>
 
   <header>
     <button id="btn-mute" class="mute-btn" title="Toggle Sound">🔊</button>
@@ -797,12 +797,22 @@
     const spacingSlider = document.getElementById('spacing-slider');
     const spinHint = document.getElementById('spin-hint');
     const bgMusic = document.getElementById('bg-music');
+    bgMusic.volume = 0.4;
     const btnMute = document.getElementById('btn-mute');
     let isMuted = false;
 
+    function ensureMusicPlays() {
+      if (!isMuted && bgMusic.paused) {
+        bgMusic.play().catch(e => console.log("Audio play blocked", e));
+      }
+    }
+
     // Add button sounds
     [btnSettings, btnCloseSettings, btnRules, btnCloseRules, btn1p, btn2p, playAgainBtn].forEach(btn => {
-      if (btn) btn.addEventListener('click', () => sounds.btn());
+      if (btn) btn.addEventListener('click', () => {
+        sounds.btn();
+        ensureMusicPlays();
+      });
     });
 
 
@@ -826,10 +836,7 @@
       rulesOverlay.classList.remove('active');
       if (!gameStarted) {
         settingsOverlay.classList.add('active');
-        // Start music on first interaction
-        if (!isMuted && bgMusic.paused) {
-          bgMusic.play().catch(e => console.log("Audio play blocked", e));
-        }
+        ensureMusicPlays();
       }
     });
 
