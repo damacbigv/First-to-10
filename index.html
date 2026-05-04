@@ -523,6 +523,69 @@
       text-shadow: none;
     }
 
+    /* --- TUTORIAL & ARROWS --- */
+    .visual-tutorial {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 9000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: all;
+    }
+    .visual-tutorial.active { display: flex; }
+
+    .tutorial-arrow {
+      position: absolute;
+      font-size: 4rem;
+      color: var(--neon-yellow);
+      text-shadow: 0 0 20px var(--neon-yellow);
+      animation: arrowPoint 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      z-index: 9001;
+    }
+    @keyframes arrowPoint {
+      from { transform: translateY(0); }
+      to { transform: translateY(-30px); }
+    }
+    
+    .arrow-dice { top: 110px; left: calc(50% - 2rem); }
+    .arrow-grid { top: 45%; left: calc(50% - 2rem); }
+
+    .tutorial-label {
+      position: absolute;
+      color: #fff;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.9rem;
+      text-align: center;
+      width: 100%;
+    }
+    .label-dice { top: 180px; }
+    .label-grid { top: 55%; }
+
+    .btn-tutorial-start {
+      position: absolute;
+      bottom: 10%;
+      padding: 20px 40px;
+      background: var(--neon-cyan);
+      color: #000;
+      border: none;
+      font-weight: bold;
+      letter-spacing: 2px;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--neon-cyan);
+      transition: all 0.3s;
+    }
+    .btn-tutorial-start:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 40px var(--neon-cyan);
+    }
+
     /* --- BACKGROUND STARS --- */
     .stars-container {
       position: fixed;
@@ -688,23 +751,27 @@
     <button id="btn-rules" class="icon-btn" title="Rules">❓</button>
   </div>
 
-  <div class="rules-overlay active" id="rules-overlay">
+  <div class="visual-tutorial" id="visual-tutorial">
+    <div class="tutorial-arrow arrow-dice">⬇️</div>
+    <div class="tutorial-label label-dice">1. Spin the Reel</div>
+    
+    <div class="tutorial-arrow arrow-grid">⬇️</div>
+    <div class="tutorial-label label-grid">2. Place your number<br><small>(Form a sum of 10 to win!)</small></div>
+    
+    <button class="btn-tutorial-start" id="btn-tutorial-start">I'M READY TO PLAY</button>
+  </div>
+
+  <div class="rules-overlay" id="rules-overlay">
     <div class="rules-content">
       <h1 style="color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan); margin: 0 0 10px 0; font-size: 2.2rem; letter-spacing: 4px;">SUM TO 10</h1>
-      <h2 style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 25px;">Tutorial & Onboarding</h2>
+      <h2 style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 25px;">Quick Rules</h2>
       
       <div style="text-align: left; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border-left: 3px solid var(--neon-cyan); margin-bottom: 30px;">
         <p style="margin: 0 0 15px 0; color: #fff; line-height: 1.4;">Players must complete a <strong>3-in-a-row</strong> line that sums up to exactly <strong>10</strong>.</p>
         <p style="margin: 0; color: #ccc; font-size: 0.9rem; line-height: 1.4;">Lines can be horizontal, vertical, or diagonal across a single board—or cutting through all <strong>three vertical layers</strong>!</p>
       </div>
 
-      <ul class="rules-list" style="font-size: 0.85rem; opacity: 0.9;">
-        <li>Spin the dice reel to get a number (1-9).</li>
-        <li>Tap any empty cell on the 3D grid to place it.</li>
-        <li>Form a line of 3 numbers adding to 10 to win.</li>
-      </ul>
-
-      <button id="btn-close-rules" style="width: 100%; padding: 18px; font-weight: bold; letter-spacing: 3px; border-radius: 8px; margin-top: 10px;">START GAME</button>
+      <button id="btn-close-rules" style="width: 100%; padding: 18px; font-weight: bold; letter-spacing: 3px; border-radius: 8px;">GOT IT</button>
     </div>
   </div>
 
@@ -730,7 +797,10 @@
     // --- AUDIO SYSTEM ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
+    let isMuted = false;
+
     function playSynthSound(freq, type, duration, volume) {
+      if (isMuted) return;
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
@@ -865,13 +935,16 @@
     const btnRules = document.getElementById('btn-rules');
     const rulesOverlay = document.getElementById('rules-overlay');
     const btnCloseRules = document.getElementById('btn-close-rules');
+    
+    const visualTutorial = document.getElementById('visual-tutorial');
+    const btnTutorialStart = document.getElementById('btn-tutorial-start');
+
     const spacingSlider = document.getElementById('spacing-slider');
     const spinHint = document.getElementById('spin-hint');
     const btnMute = document.getElementById('btn-mute');
-    let isMuted = false;
-
+    
     function ensureMusicPlays() {
-      vibeEngine.start();
+      if (!isMuted) vibeEngine.start();
     }
 
     // Add button sounds
@@ -902,9 +975,15 @@
     btnCloseRules.addEventListener('click', () => {
       rulesOverlay.classList.remove('active');
       if (!gameStarted) {
-        settingsOverlay.classList.add('active');
-        ensureMusicPlays();
+        visualTutorial.classList.add('active');
       }
+    });
+
+    btnTutorialStart.addEventListener('click', () => {
+      visualTutorial.classList.remove('active');
+      sessionStorage.setItem('tutorialSeen', 'true');
+      settingsOverlay.classList.add('active');
+      ensureMusicPlays();
     });
 
     btnMute.addEventListener('click', () => {
@@ -1272,6 +1351,15 @@
     // Initialize
     initStars();
     updateStatus();
+
+    // Session logic for tutorial
+    if (!sessionStorage.getItem('tutorialSeen')) {
+      rulesOverlay.classList.add('active');
+    } else {
+      settingsOverlay.classList.add('active');
+      // If tutorial seen, we still need interaction to play music
+      document.addEventListener('click', () => ensureMusicPlays(), { once: true });
+    }
 
   </script>
 </body>
