@@ -6,6 +6,7 @@
   <title>First to 10: 3D Stacked Grid v1.0</title>
   <!-- Release 1.0: Pure procedural audio, fluid scaling, and optimized 3D mechanics -->
   <style>
+    * { box-sizing: border-box; }
     :root {
       --bg-color: #08080a;
       --neon-cyan: #00f3ff;
@@ -427,21 +428,22 @@
 
     /* --- SLIDER & FOOTER --- */
     .footer-controls {
-      padding: 10px 15px;
+      padding: 10px;
       display: flex;
       flex-direction: row;
-      justify-content: center;
+      justify-content: space-evenly;
       align-items: center;
-      gap: 15px;
+      gap: 10px;
       flex-shrink: 0;
       z-index: 10;
       margin: 10px auto 20px auto;
-      width: calc(100% - 40px);
+      width: 90%;
       max-width: 440px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 40px;
       backdrop-filter: blur(10px);
+      box-sizing: border-box;
     }
 
     .slider-container {
@@ -455,7 +457,7 @@
       background: transparent;
       border: none;
       color: #888;
-      font-size: clamp(1.2rem, 4.5vmin, 1.6rem);
+      font-size: clamp(1.2rem, 4vmin, 1.5rem);
       cursor: pointer;
       padding: 5px;
       transition: all 0.2s;
@@ -463,6 +465,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
     .icon-btn:hover {
